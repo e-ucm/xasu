@@ -40,7 +40,8 @@ namespace Xasu
         {
             base.Awake();
             trackerStatus = new TrackerStatus();
-            DefaultIdPrefix = "http://" + Application.productName.Replace(' ','_') + "/";
+            string withOutSpecialCharacters = new string(Application.productName.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-').ToArray());
+            DefaultIdPrefix = "https://" + withOutSpecialCharacters.Replace(' ','_') + "/";
         }
         protected async void Start()
         {
@@ -123,7 +124,7 @@ namespace Xasu
                             : await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null);
                     }
 
-                    if (backupAuthProtocol.State == AuthState.Errored)
+                    if (backupAuthProtocol != null && backupAuthProtocol.State == AuthState.Errored)
                     {
                         LogError("[TRACKER] Failed to initialize auth for backup: " + backupAuthProtocol.ErrorMessage);
                         return;

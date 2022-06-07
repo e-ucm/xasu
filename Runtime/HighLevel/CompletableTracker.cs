@@ -102,7 +102,7 @@ namespace Xasu.HighLevel
 
             if (initializedTimes.ContainsKey(completableId))
             {
-                throw new Cmi5Exception("The initialized statement for the specified id has already been sent!");
+                throw new XApiException("The initialized statement for the specified id has already been sent!");
             }
 
             initializedTimes.Add(completableId, DateTime.Now);
@@ -146,122 +146,44 @@ namespace Xasu.HighLevel
         /// <summary>
         /// Player completed a completable.
         /// Type = Completable
-        /// Success = true
-        /// Score = 1
         /// </summary>
         /// <param name="completableId">Completable identifier.</param>
         public StatementPromise Completed(string completableId)
         {
-            return Completed(completableId, CompletableType.Completable, false, false, false, 0, false, 0);
+            return Completed(completableId, CompletableType.Completable, false, 0);
         }
 
         /// <summary>
         /// Player completed a completable.
-        /// Success = true
-        /// Score = 1
         /// </summary>
         /// <param name="completableId">Completable identifier.</param>
         /// <param name="type">Completable type.</param>
         public StatementPromise Completed(string completableId, CompletableType type)
         {
-            return Completed(completableId, type, false, false, false, 0, false, 0);
-        }
-
-        /// <summary>
-        /// Player completed a completable.
-        /// Score = 1
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="success">Completable success.</param>
-        public StatementPromise Completed(string completableId, CompletableType type, bool success)
-        {
-            return Completed(completableId, type, true, success, false, 0, false, 0);
-        }
-
-        /// <summary>
-        /// Player completed a completable.
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="score">Completable score.</param>
-        public StatementPromise Completed(string completableId, float score, CompletableType type)
-        {
-            return Completed(completableId, type, false, false, true, score, false, 0);
-        }
-
-        /// <summary>
-        /// Player completed a completable.
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="success">Completable success.</param>
-        /// <param name="score">Completable score.</param>
-        public StatementPromise Completed(string completableId, float score, CompletableType type, bool success)
-        {
-            return Completed(completableId, type, true, success, true, score, false, 0);
+            return Completed(completableId, type, false, 0);
         }
 
         /// <summary>
         /// Player completed a completable.
         /// Type = Completable
-        /// Success = true
-        /// Score = 1
         /// </summary>
         /// <param name="completableId">Completable identifier.</param>
         public StatementPromise Completed(string completableId, float durationInSeconds)
         {
-            return Completed(completableId, CompletableType.Completable, false, false, false, 0, true, durationInSeconds);
+            return Completed(completableId, CompletableType.Completable, true, durationInSeconds);
         }
 
         /// <summary>
         /// Player completed a completable.
-        /// Success = true
-        /// Score = 1
         /// </summary>
         /// <param name="completableId">Completable identifier.</param>
         /// <param name="type">Completable type.</param>
         public StatementPromise Completed(string completableId, CompletableType type, float durationInSeconds)
         {
-            return Completed(completableId, type, false, false, false, 0, true, durationInSeconds);
+            return Completed(completableId, type, true, durationInSeconds);
         }
 
-        /// <summary>
-        /// Player completed a completable.
-        /// Score = 1
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="success">Completable success.</param>
-        public StatementPromise Completed(string completableId, CompletableType type, bool success, float durationInSeconds)
-        {
-            return Completed(completableId, type, true, success, false, 0, true, durationInSeconds);
-        }
-
-        /// <summary>
-        /// Player completed a completable.
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="score">Completable score.</param>
-        public StatementPromise Completed(string completableId, float score, CompletableType type, float durationInSeconds)
-        {
-            return Completed(completableId, type, false, false, true, score, true, durationInSeconds);
-        }
-
-        /// <summary>
-        /// Player completed a completable.
-        /// </summary>
-        /// <param name="completableId">Completable identifier.</param>
-        /// <param name="type">Completable type.</param>
-        /// <param name="success">Completable success.</param>
-        /// <param name="score">Completable score.</param>
-        public StatementPromise Completed(string completableId, float score, CompletableType type, bool success, float durationInSeconds)
-        {
-            return Completed(completableId, type, true, success, true, score, true, durationInSeconds);
-        }
-
-        private StatementPromise Completed(string completableId, CompletableType type, bool hasSuccess, bool success, bool hasScore, float score, bool hasDuration, float durationInSeconds)
+        private StatementPromise Completed(string completableId, CompletableType type, bool hasDuration, float durationInSeconds)
         {
             if (!hasDuration && !initializedTimes.ContainsKey(completableId))
             {
@@ -281,12 +203,7 @@ namespace Xasu.HighLevel
                 target = GetTargetActivity(completableId, type),
                 result = new Result
                 {
-                    completion = true,
-                    success = hasSuccess ? (bool?)success : null,
-                    score = hasScore ? new Score
-                    {
-                        scaled = score
-                    } : null
+                    completion = true
                 }
             });
         }

@@ -161,6 +161,9 @@ namespace Xasu.Processors
                                     ErrorMessage = "Forbidden: " + apiEx.Message;
                                     authProtocol?.Forbidden(apiEx);
                                     break;
+                                default:
+                                    XasuTracker.Instance.LogError("[TRACKER: Online Processor] Failed to submit traces with API (" + apiEx.HttpCode + ") response: " + response.errMsg);
+                                    break;
                             }
                         }
                         else
