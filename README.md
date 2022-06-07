@@ -8,15 +8,15 @@ Xasu is a *tracker*, which, when integrated into a game, can send and/or store p
 
 The *su* in Xasu also stands for *super*, since it is:
 
-- Super Simpl (High-Level API): provides a high-level API that represents xAPI profiles for serious games and CMI-5. Using these APIs, the system will take care of setting up most of the trace structure automatically and with sane defaults. This reduces the learning curve with xAPI, while also allowing developers to refine the produced trace. 
+- Super **Simple** (High-Level API): provides a high-level API that represents xAPI profiles for serious games and CMI-5. Using these APIs, the system will take care of setting up most of the trace structure automatically and with sane defaults. This reduces the learning curve with xAPI, while also allowing developers to refine the produced trace. 
 
-- Super Supportive (multi-platform/protocol/cmi5): Xasu has been designed to run on Unity, respecting the nature of cross-platform games and environments (Windows, Mac, Linux, Android and WebGL, iOS incoming). In addition, Xasu supports multiple authorization protocols (basic/oauth/oauth2) and the cmi5 protocol for conducting courses and activities with xAPI in Learning Management Systems (LMSs).
+- Super **Supportive** (multi-platform/protocol/cmi5): Xasu has been designed to run on Unity, respecting the nature of cross-platform games and environments (Windows, Mac, Linux, Android and WebGL, iOS incoming). In addition, Xasu supports multiple authorization protocols (basic/oauth/oauth2) and the cmi5 protocol for conducting courses and activities with xAPI in Learning Management Systems (LMSs).
 
-- Super Asyncronous (async/await): Xasu's architecture provides a proper asynchronous queue to avoid interruptions that allows deveñpèrs to use the .NET asynchronous API (async/await) and to check on the result of sending synchronously-sent traces, even if the traces are sent in batches.
+- Super **Asyncronous** (uses async/await): Xasu's architecture provides a proper asynchronous queue to avoid interruptions that allows deveñpèrs to use the .NET asynchronous API (async/await) and to check on the result of sending synchronously-sent traces, even if the traces are sent in batches.
 
-- Super Flexible (working modes/backups): Xasu can operate in different modes, including an online mode (connected to an LRS), offline mode (generating a local log file in xAPI or CSV), in fallback mode (hybrid online and local depending on connectivity), and in backup mode (generating and/or sending a single file with all traces at the end).
+- Super **Flexible** (working modes/backups): Xasu can operate in different modes, including an online mode (connected to an LRS), offline mode (generating a local log file in xAPI or CSV), in fallback mode (hybrid online and local depending on connectivity), and in backup mode (generating and/or sending a single file with all traces at the end).
 
-- Super Reliable (communication policies and error resiliency): Xasu uses retry policies with exponential backoff and circuit-breakers to provide recovery intervals and fallback mechanisms.
+- Super **Reliable** (communication policies and error resiliency): Xasu uses retry policies with exponential backoff and circuit-breakers to provide recovery intervals and fallback mechanisms.
 
 # Setting Up Xasu
 
