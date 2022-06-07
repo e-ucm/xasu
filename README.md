@@ -422,8 +422,7 @@ Some examples are listed below:
     AlternativeTracker.Instance.Selected("dialog-1", "option-1", AlternativeTracker.AlternativeType.Dialog);
 
     // In this tracker is also recommended to include the success extension by using the simplified sintax
-    var sp = AlternativeTracker.Instance.Selected("alternative-1", "option-2");
-    sp.SetSuccess(true);
+    AlternativeTracker.Instance.Selected("alternative-1", "option-2").WithSuccess(true);
 ```
 
 Full list of Alternative types:
@@ -446,9 +445,7 @@ Some examples are listed below:
 ```cs
     CompletableTracker.Instance.Initialized("tutorial");
     CompletableTracker.Instance.Progressed("tutorial", 0.5f); // 50% progress
-    var completed = CompletableTracker.Instance.Completed("tutorial"); // 50% progress
-    completed.SetSuccess(true);
-    completed.SetScore(0.8f);
+    CompletableTracker.Instance.Completed("tutorial").WithSuccess(true).WithScore(0.8f); // completed successfully with 0.8/1.0 score
 ```
 
 Full list of Completable types:
