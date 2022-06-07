@@ -24,9 +24,9 @@ namespace Xasu.Auth.Protocols
         private readonly string consumerKeyField = "oauth_consumer_key";
         private readonly string consumerSecretField = "oauth_consumer_secret";
         private readonly string signatureMethodField = "oauth_signature_method";
-        private readonly string signatureField = "oauth_signature";
-        private readonly string timestampField = "oauth_timestamp";
-        private readonly string callbackField = "oauth_callback";
+        //private readonly string signatureField = "oauth_signature";
+        //private readonly string timestampField = "oauth_timestamp";
+        //private readonly string callbackField = "oauth_callback";
 
         // Custom fields
         private readonly string requestTokenEndpointField = "request_token_endpoint"; // AKA "initiate" endpoint
