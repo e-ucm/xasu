@@ -1,42 +1,43 @@
 # Xasu - xAPI Analytics Supplier
 
-The Xasu (xAPI Analytics Supplier) is a Unity (https://unity.com/) asset created to use of xAPI Learning Analytics in Unity with straightforward cmi5 support. 
-This tracker aims to simplify the work of the developer of serious games (or applications using LA) by providing a set of functionalities and quality of life utilities with which to configure the collection of xAPI traces in a flexible and robust way. The tracker has been developed by the e-UCM group and is part of the e-UCM ecosystem of tools for Learning Analytics (Simva, T-mon, Pumva, μfasa and Xasu).
+The Xasu (xAPI Analytics Supplier) is a Unity (https://unity.com/) asset that simplifies use of [xAPI](https://xapi.com/) Learning Analytics from Unity with straightforward cmi5 support.
+
+Xasu is a *tracker*, which, when integrated into a game, can send and/or store player interactions for later analysis. This is especially important when proving that a serious game is effective at its goal, be it teaching, training, or changing the players' perspective on real-world issues. As a tracker, Xasu simplifies the work of serious games developers (or of any application using LA) by providing both simple tracking and multipe quality-of-life utilities with which to configure the collection of xAPI traces in a flexible and robust way. Xasu has been developed by the [e-UCM group](https://www.e-ucm.es) and is part of the e-UCM ecosystem of tools for Learning Analytics (Simva, T-mon, Pumva, μfasa and Xasu).
 
 # The "Super" in Xasu
 
-Although the SU in its acronym stands for supplier, since it provides game traces to other parts of the ecosystem, SU also stands for super, since this tracker aims to be a super effective solution to all use cases. These "super" keys are:
+The *su* in Xasu also stands for *super*, since it is:
 
-- Super Simple (High-Level API): This tracker provides a high-level API that represents the xAPI profiles for serious games and CMI-5. Using these APIs, the system will take care of setting up most of the trace structure automatically and in a very simplified way. This API reduces the learning curve with xAPI, but also leaves the user free to refine the produced trace. 
+- Super Simpl (High-Level API): provides a high-level API that represents xAPI profiles for serious games and CMI-5. Using these APIs, the system will take care of setting up most of the trace structure automatically and with sane defaults. This reduces the learning curve with xAPI, while also allowing developers to refine the produced trace. 
 
-- Super Supportive (Multi-platform/protocol/cmi5): Xasu has been designed to run on Unity, respecting the nature of cross-platform games and environments (Windows, Mac, Linux, Android and WebGL, iOS incoming). In addition, this tracker supports multiple authorization protocols (basic/oauth/oauth2) and the cmi5 protocol for conducting courses and activities with xAPI in Learning Management Systems.
+- Super Supportive (multi-platform/protocol/cmi5): Xasu has been designed to run on Unity, respecting the nature of cross-platform games and environments (Windows, Mac, Linux, Android and WebGL, iOS incoming). In addition, Xasu supports multiple authorization protocols (basic/oauth/oauth2) and the cmi5 protocol for conducting courses and activities with xAPI in Learning Management Systems (LMSs).
 
-- Super Asyncronous (async/await): Its architecture provides a proper asynchronous queue to avoid interruptions that allows the user to use the .NET asynchronous API (async/await) and to know the concrete result of sending his trace synchronously, even if the traces are sent in batches.
+- Super Asyncronous (async/await): Xasu's architecture provides a proper asynchronous queue to avoid interruptions that allows deveñpèrs to use the .NET asynchronous API (async/await) and to check on the result of sending synchronously-sent traces, even if the traces are sent in batches.
 
-- Super Flexible (Working modes/backups): It can operate in different modes, including online mode (connected to an LRS), offline mode (generating a local log file in xAPI or CSV), in fallback mode (hybrid online and local depending on connectivity), and in backup mode (generating and/or sending a single file with all traces at the end).
+- Super Flexible (working modes/backups): Xasu can operate in different modes, including an online mode (connected to an LRS), offline mode (generating a local log file in xAPI or CSV), in fallback mode (hybrid online and local depending on connectivity), and in backup mode (generating and/or sending a single file with all traces at the end).
 
-- Super Reliable (Communication pollicies and error resilient): It uses retry policies with exponential backoff and circuit-breakers to provide recovery intervals and fallback mechanisms.
+- Super Reliable (communication policies and error resiliency): Xasu uses retry policies with exponential backoff and circuit-breakers to provide recovery intervals and fallback mechanisms.
 
 # Setting Up Xasu
 
-Xasu requires at least Unity 2019.4 (LTS).
+Xasu requires at least **Unity 2019.4 (LTS)**.
 
 ## Installation
 
-Xasu can be downloaded through the Unity Package Manager using this project's Git repository link.
+Xasu can be downloaded through the Unity Package Manager using the [repository link](https://github.com/e-ucm/xasu.git) of this project.
 
 To add it to your proyect go to ``Window>Package Manager`` press the "+" icon and select ``Add package from git...``.
 Insert ```https://github.com/e-ucm/xasu.git``` and press "Add".
 
-In case it is mnnually added to your project (for example, downloading the repository as a .zip), make sure you install also the NewtonSoft.JSON library in the Unity Package Manager.
+If adding Xasu manually to your project (for example, by downloading the repository as a .zip), make sure you install also the NewtonSoft.JSON library using the Unity Package Manager.
 
 ## Setting up the configuration file
 
-The Xasu configuration contains the settings for the overall system tuning, the LRS endpoint, its authorization protocols and the different working modes. The tracker configuration can be provided either using the StreamingAssets folder (Recommended mode) or via scripting. We recommend using the StreamingAssets folder so the configuration can be changed after the game is exported. Using this method allows for simpler adaptation of the game to different scenarios without having to recompile.
+The Xasu configuration file contains settings for overall system tuning, LRS endpoint location, authorization protocols and options, and working mode selection. The tracker configuration can be provided either using the `StreamingAssets` folder (recommended) or via scripting. We recommend using the `StreamingAssets` folder to allow configuration to be changed after the game is exported, allowing simpler adaptation of the game to different scenarios without having to recompila the whole game.
 
 ### Minimal "tracker_config.json"
 
-The configuration file has to be placed under the following path:
+The configuration file must be present under
 
 ```path
 Assets/StreamingAssets/tracker_config.json
