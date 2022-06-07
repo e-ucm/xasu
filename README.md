@@ -164,7 +164,7 @@ The following list of http errors are isolated by the tracker and returned to th
 * Conflict (409): An APIException(409) is thrown when the trace id is in conflict with another trace.
 * Request Entity Too Large (412): An APIException(412) is thrown when the trace is too large and the LRS rejects it.
 
-##### Fallback mode
+##### Fallback in the online mode
 
 The fallback mode is a special working mode for error-prone environments. If the fallback mode is enabled, it will store the traces locally while any circuit is open. Normally, circuits will open when the network fails or the server returns any unhandled status such as 5xx errors. 
 
@@ -186,7 +186,7 @@ To enable the fallback mode you need to use the following property in the config
     "fallback": "true"
 ```
 
-##### Local mode
+#### Local mode
 
 The local mode saves traces in a permanent local file in the selected format. At the current version it is only possible to store the traces in xAPI format. However, the CSV format is one planned feature.
 Traces in the local mode are stored in the following file:
@@ -200,7 +200,7 @@ To enable the local mode and configure the output format include the following c
     "format": "XAPI"
 ```
 
-##### Backup mode
+#### Backup mode
 
 The backup mode saves the traces in a temporal local file location for later submission or recollection. When the Xasu tracker is finalized at the end of the game, this backup can optionally be send automatically to an endpoint.
 
