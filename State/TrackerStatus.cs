@@ -48,6 +48,11 @@ namespace Xasu
 
         private bool monitoring = false;
 
+        public TrackerStatus()
+        {
+            State = TrackerState.Uninitialized;
+        }
+
         public void Monitor(IProcessor onlineProcessor, IProcessor localProcessor, IProcessor backupProcessor, IAuthProtocol onlineAuthProtocol, IAuthProtocol backupAuthProtocol)
         {
             monitoring = true;

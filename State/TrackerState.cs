@@ -8,6 +8,6 @@ namespace Xasu
 {
     public enum TrackerState
     {
-        Normal, NetworkRequired, Fallback, Errored, Finalized
+        Uninitialized, Normal, NetworkRequired, Fallback, Errored, Finalized
     }
 }

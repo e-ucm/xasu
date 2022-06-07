@@ -60,7 +60,7 @@ namespace Xasu.Processors
 
         public override async Task Init()
         {
-            trackerProcessingTime = Xasu.Instance.processingLoopTime;
+            trackerProcessingTime = XasuTracker.Instance.processingLoopTime;
 
             // Init Auth
             this.lrs = new UnityLRS(lrsEndpoint)
@@ -108,7 +108,7 @@ namespace Xasu.Processors
                         {
                             // Enlarge batch size until we reach the maximum size
                             currentBatchSize = Mathf.Min(batchSize, currentBatchSize * 2);
-                            Xasu.Instance.processingLoopTime = Mathf.Min(trackerProcessingTime, Xasu.Instance.processingLoopTime * 2f);
+                            XasuTracker.Instance.processingLoopTime = Mathf.Min(trackerProcessingTime, XasuTracker.Instance.processingLoopTime * 2f);
 
                             if (hasFallbackTraces)
                             {
@@ -143,9 +143,9 @@ namespace Xasu.Processors
                                     }
                                     else
                                     {
-                                        Xasu.Instance.LogError("[TRACKER: Online Processor] Failed to submit traces. Reducing flush size. Error: " + response.errMsg);
+                                        XasuTracker.Instance.LogError("[TRACKER: Online Processor] Failed to submit traces. Reducing flush size. Error: " + response.errMsg);
                                         currentBatchSize = Mathf.Max(1, currentBatchSize / 2);
-                                        Xasu.Instance.processingLoopTime = Mathf.Max(minTrackerProcessingTime, Xasu.Instance.processingLoopTime / 2f);
+                                        XasuTracker.Instance.processingLoopTime = Mathf.Max(minTrackerProcessingTime, XasuTracker.Instance.processingLoopTime / 2f);
                                     }
                                     apiCircuitBreaker.Reset();
                                     break;
@@ -165,12 +165,12 @@ namespace Xasu.Processors
                         }
                         else
                         {
-                            Xasu.Instance.LogError("[TRACKER: Online Processor] Failed to submit traces with response: " + response.errMsg);
+                            XasuTracker.Instance.LogError("[TRACKER: Online Processor] Failed to submit traces with response: " + response.errMsg);
                         }
                     }
                     catch (NetworkException networkException)
                     {
-                        Xasu.Instance.LogError("[TRACKER: Online Processor] Network failed: " + networkException.Message);
+                        XasuTracker.Instance.LogError("[TRACKER: Online Processor] Network failed: " + networkException.Message);
                     }
                     catch (BrokenCircuitException)
                     {
@@ -277,7 +277,7 @@ namespace Xasu.Processors
             foreach (var trace in lastTraceTasks)
             {
                 TracesFailed++;
-                Xasu.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Statement failed. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), trace.statement.id), ex);
+                XasuTracker.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Statement failed. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), trace.statement.id), ex);
                 trace.completionSource.SetException(ex);
                 localQueue.PopFront();
             }
@@ -368,7 +368,7 @@ namespace Xasu.Processors
                     {
                         TracesFromFallbackFailed++;
                         // Log the error in the main log
-                        Xasu.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Failed to send fallback trace with id \"{2}\".",
+                        XasuTracker.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Failed to send fallback trace with id \"{2}\".",
                             Thread.CurrentThread.ManagedThreadId, this.GetType(), lastStatements[i].id), ex);
 
                         // Move the cursor
@@ -392,7 +392,7 @@ namespace Xasu.Processors
             }
             catch (SystemException se)
             {
-                Xasu.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Failed to write traces in fallback errors.",
+                XasuTracker.Instance.LogError(string.Format("[TRACKER ({0}): {1}] Failed to write traces in fallback errors.",
                     Thread.CurrentThread.ManagedThreadId, this.GetType()), se);
             }
 

@@ -2,6 +2,6 @@
 {
     public interface IHighLevelTracker
     {
-        Xasu Tracker { get; set; }
+        XasuTracker Tracker { get; set; }
     }
 }

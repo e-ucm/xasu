@@ -10,7 +10,7 @@ namespace Xasu.HighLevel
         protected static T instance;
         public static T Instance { get { return instance ?? (instance = new T()); } }
 
-        public Xasu Tracker { get; set; }
+        public XasuTracker Tracker { get; set; }
 
         protected abstract Dictionary<Enum, string> VerbIds { get; }
         protected abstract Dictionary<Enum, string> TypeIds { get; }
@@ -34,7 +34,7 @@ namespace Xasu.HighLevel
         {
             if (!Uri.IsWellFormedUriString(id, UriKind.Absolute))
             {
-                id = Xasu.Instance.DefaultIdPrefix + id;
+                id = XasuTracker.Instance.DefaultIdPrefix + id;
             }
 
             return new Activity
@@ -80,7 +80,7 @@ namespace Xasu.HighLevel
 
         protected static StatementPromise Enqueue(Statement statement)
         {
-            return new StatementPromise(statement, Xasu.Instance.Enqueue(statement));
+            return new StatementPromise(statement, XasuTracker.Instance.Enqueue(statement));
         }
 
     }

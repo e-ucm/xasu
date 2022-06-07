@@ -63,7 +63,7 @@ namespace Xasu.Processors
             AgentProfileDocument = agentResponse.content;
 
             // Setup the context
-            Xasu.Instance.DefaultContext = Cmi5Helper.ContextTemplate;
+            XasuTracker.Instance.DefaultContext = Cmi5Helper.ContextTemplate;
 
             // Send initialized statement
             var initializedResponse = await SendInitializedAUStatement();

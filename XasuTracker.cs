@@ -15,8 +15,10 @@ using UnityEngine;
 
 namespace Xasu
 {
-    public class Xasu : Singleton<Xasu>
+    public class XasuTracker : Singleton<XasuTracker>
     {
+        public bool AutoStart = false;
+
         public float processingLoopTime = 1; // In Seconds
 
         private bool processing = false;
@@ -39,6 +41,13 @@ namespace Xasu
             base.Awake();
             trackerStatus = new TrackerStatus();
             DefaultIdPrefix = "http://" + Application.productName.Replace(' ','_') + "/";
+        }
+        protected async void Start()
+        {
+            if (AutoStart)
+            {
+                await Init();
+            }
         }
 
         public TrackerStatus Status 
@@ -158,7 +167,12 @@ namespace Xasu
 
         public async Task Finalize(IProgress<float> progress = null)
         {
-            if(Status.State == TrackerState.Errored)
+            if (Status.State == TrackerState.Uninitialized)
+            {
+                throw new InvalidOperationException("The tracker is not initialized!");
+            }
+
+            if (Status.State == TrackerState.Errored)
             {
                 throw new InvalidOperationException("The tracker cannot be finalized in 'Errored' state. " +
                     "(Check the tracker status for more information)");
@@ -205,8 +219,9 @@ namespace Xasu
 
         public async Task Flush()
         {
-            if (Status.State == TrackerState.Finalized)
+            if (Status.State == TrackerState.Finalized || Status.State == TrackerState.Uninitialized)
             {
+                // Ignoring....
                 return;
             }
 
@@ -235,6 +250,11 @@ namespace Xasu
 
         public Task<Statement> Enqueue(Statement statement)
         {
+            if (Status.State == TrackerState.Uninitialized)
+            {
+                throw new InvalidOperationException("The tracker is not initialized! Initialize it using Init()");
+            }
+
             if (Status.State == TrackerState.Finalized)
             {
                 Debug.LogWarning("The tracker has been finalized. Traces enqueued won't be send!");
