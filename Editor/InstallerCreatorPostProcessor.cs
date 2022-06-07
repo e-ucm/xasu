@@ -152,8 +152,6 @@ public class InstallerCreatorPostProcessor : IPreprocessBuildWithReport
                 break;
 
             // Linux
-            case BuildTarget.StandaloneLinux:
-                break;
             case BuildTarget.StandaloneLinux64:
                 break;
 
@@ -212,8 +210,8 @@ public class InstallerCreatorPostProcessor : IPreprocessBuildWithReport
         project.AddRegKey(new RegKey(fullSetup, RegistryHive.CurrentUser, @"Software\Classes\" + PlayerSettings.applicationIdentifier + @"\shell"));
         project.AddRegKey(new RegKey(fullSetup, RegistryHive.CurrentUser, @"Software\Classes\" + PlayerSettings.applicationIdentifier + @"\shell\open"));
         project.AddRegValue(new RegValue(fullSetup, RegistryHive.CurrentUser, @"Software\Classes\" + PlayerSettings.applicationIdentifier
-            + @"\shell\open\command", "", "\"[INSTALLDIR]Launcher.exe\" \"%1\""));
-        //+ @"\shell\open\command", "", "\"[INSTALLDIR]" + PlayerSettings.productName + ".exe\" \"%1\""));
+        //    + @"\shell\open\command", "", "\"[INSTALLDIR]Launcher.exe\" \"%1\""));
+            + @"\shell\open\command", "", "\"[INSTALLDIR]" + PlayerSettings.productName + ".exe\" -cmi5 \"%1\""));
 
         if (!Directory.Exists("Installers"))
         {
