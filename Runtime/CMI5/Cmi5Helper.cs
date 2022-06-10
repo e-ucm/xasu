@@ -42,6 +42,7 @@ namespace Xasu.CMI5
          * STATE DOCUMENT
          * ******************/
         public static Context ContextTemplate { get; set; }
+        public static Context Cmi5Allowed { get; set; }
         public static Context Cmi5Context { get; private set; }
         public static Context MoveOnContext { get; private set; }
         public static Context MasteryScoreContext { get; private set; }
@@ -91,6 +92,7 @@ namespace Xasu.CMI5
             }
 
             // Additional contexts for Cmi5 Tracker statements
+            Cmi5Allowed = SetUpCmi5Allowed(ContextTemplate, Registration);
             Cmi5Context = SetUpCmi5Context(ContextTemplate, Registration);
             MoveOnContext = SetUpMoveOnContext(ContextTemplate, Registration);
             MasteryScoreContext = SetUpMasteryScoreContext(ContextTemplate, Registration, MasteryScore);
@@ -150,12 +152,21 @@ namespace Xasu.CMI5
             return context;
         }
 
-        private static Context SetUpCmi5Context(Context contextTemplate, Guid registration)
+        private static Context SetUpCmi5Allowed(Context contextTemplate, Guid registration)
         {
             Context context = SetUpContext(contextTemplate, registration);
 
-            // Setup cmi5 'defined' required values
+            // Setup cmi5 'allowed' required values
             context.registration = registration;
+
+            return context;
+        }
+
+        private static Context SetUpCmi5Context(Context contextTemplate, Guid registration)
+        {
+            Context context = SetUpCmi5Allowed(contextTemplate, registration);
+
+            // Setup cmi5 'defined' required values
             context.contextActivities.category.Add(new Activity
             {
                 id = "https://w3id.org/xapi/cmi5/context/categories/cmi5"

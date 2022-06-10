@@ -23,12 +23,15 @@ namespace Xasu.CMI5
                     throw new NotImplementedException("Cmi5 param not found or wrong formatted!");
                 }
                 var cmi5Args = cliArgs[cmi5ParamIndex + 1];
-                var queryDictionary = System.Web.HttpUtility.ParseQueryString(cmi5Args);
+
+                var uri = new Uri(cmi5Args);
+                var queryDictionary = System.Web.HttpUtility.ParseQueryString(uri.Query);
                 return queryDictionary.Get(name);
             }
             else if(Application.platform == RuntimePlatform.WindowsEditor)
             {
-                var queryDictionary = System.Web.HttpUtility.ParseQueryString(GameObject.FindObjectOfType<ArgSimulator>().cmi5Arg);
+                var uri = new Uri(GameObject.FindObjectOfType<ArgSimulator>().cmi5Arg);
+                var queryDictionary = System.Web.HttpUtility.ParseQueryString(uri.Query);
                 return queryDictionary.Get(name);
             }
 

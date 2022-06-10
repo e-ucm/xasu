@@ -35,8 +35,7 @@ namespace Xasu.Processors
         private int currentBatchSize;
         protected IAsyncLRS lrs;
         private bool hasFallbackTraces;
-        private ICircuitBreakerPolicy networkCircuitBreaker;
-        private ICircuitBreakerPolicy apiCircuitBreaker;
+        protected ICircuitBreakerPolicy networkCircuitBreaker, apiCircuitBreaker;
 
         public int TracesToFallback = 0, TracesFromFallbackSent = 0, TracesFromFallbackFailed = 0;
 
@@ -197,7 +196,7 @@ namespace Xasu.Processors
             } while (complete && (hasFallbackTraces || localQueue.Size > 0));
         }
 
-        private bool CircuitsClosed()
+        protected bool CircuitsClosed()
         {
             return (networkCircuitBreaker.CircuitState == CircuitState.Closed || networkCircuitBreaker.CircuitState == CircuitState.HalfOpen)
                 && (apiCircuitBreaker.CircuitState == CircuitState.Closed || apiCircuitBreaker.CircuitState == CircuitState.HalfOpen);
@@ -235,7 +234,7 @@ namespace Xasu.Processors
 
             // API breaker restarts after 30 seconds
             var apiBreaker = Policy
-                .Handle<APIException>()
+                .Handle<APIException>(apiEx => apiEx.HttpCode != 404)
                 .CircuitBreakerAsync(1, TimeSpan.FromSeconds(30));
             apiCircuitBreaker = apiBreaker;
 

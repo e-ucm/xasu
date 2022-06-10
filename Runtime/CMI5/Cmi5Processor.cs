@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TinCan;
 using TinCan.Documents;
@@ -45,6 +46,8 @@ namespace Xasu.Processors
                 throw new Cmi5Exception(string.Format(retrieveStateDocumentError, stateResponse.errMsg), stateResponse.httpException);
             }
 
+            if (!CircuitsClosed()) apiCircuitBreaker.Reset();
+
             StateDocument = stateResponse.content;
             if(StateDocument != null && StateDocument.content != null)
             {
@@ -59,12 +62,13 @@ namespace Xasu.Processors
                 State = ProcessorState.Errored;
                 throw new Cmi5Exception(string.Format(retrieveAgentDocumentError, agentResponse.errMsg), agentResponse.httpException);
             }
-
             AgentProfileDocument = agentResponse.content;
+            if (!CircuitsClosed()) apiCircuitBreaker.Reset();
 
             // Setup the context
-            XasuTracker.Instance.DefaultContext = Cmi5Helper.ContextTemplate;
+            XasuTracker.Instance.DefaultContext = Cmi5Helper.Cmi5Allowed;
 
+            State = ProcessorState.Working;
             // Send initialized statement
             var initializedResponse = await SendInitializedAUStatement();
             if (!initializedResponse.success)
@@ -72,6 +76,7 @@ namespace Xasu.Processors
                 State = ProcessorState.Errored;
                 throw new Cmi5Exception(string.Format(saveInitializedStatementError, initializedResponse.errMsg), initializedResponse.httpException);
             }
+            if (!CircuitsClosed()) apiCircuitBreaker.Reset();
 
             State = ProcessorState.Working;
         }
