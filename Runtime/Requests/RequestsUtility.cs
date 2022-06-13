@@ -185,7 +185,7 @@ namespace Xasu.Requests
                 Application.runInBackground = true;
             }
 
-            Debug.Log(string.Format("[REQUESTS] {1} Requesting \"{0}\"", webRequest.url, webRequest.method));
+            Debug.Log(string.Format("[REQUESTS ({2})] {1} Requesting \"{0}\"", webRequest.url, webRequest.method, Thread.CurrentThread.ManagedThreadId));
             asyncRequest = webRequest.SendWebRequest();
 
             if (inBackground)
@@ -210,7 +210,7 @@ namespace Xasu.Requests
             }
 
             // Sometimes the webrequest is finished but the download is not
-            while (!webRequest.isNetworkError && !webRequest.isHttpError && webRequest.downloadProgress != 1)
+            while (!webRequest.isNetworkError && !webRequest.isHttpError && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1)
             {
                 await Task.Yield();
             }
@@ -235,8 +235,8 @@ namespace Xasu.Requests
                 throw new BackgroundException(backgroundError);
             }
 
-            Debug.Log(string.Format("[REQUESTS] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
-                webRequest.url, webRequest.method, webRequest.responseCode, webRequest.downloadHandler.text));
+            Debug.Log(string.Format("[REQUESTS ({4})] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
+                webRequest.url, webRequest.method, webRequest.responseCode, webRequest.downloadHandler.text, Thread.CurrentThread.ManagedThreadId));
 
             return webRequest;
         }
