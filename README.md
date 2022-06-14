@@ -91,6 +91,9 @@ Please visit our Wiki to get more details on using cmi5 in Xasu.
 
 Once Xasu is installed and configured, to add Xasu to your game you just have to create a new GameObject in Unity and include the Xasu component.
 
+If you want to know more about how Xasu works, please check the Wiki:
+* Working with Xasu: https://github.com/e-ucm/xasu/wiki/Working-with-Xasu
+
 ### Initializing Xasu
 
 When Xasu is added to your scene it won't initialize and connect by default. 
@@ -103,6 +106,9 @@ You can also initialize Xasu manually by using the ```Init``` method:
 ```cs
     await Xasu.Instance.Init();
 ```
+
+If you want to learn more about how to initialize Xasu please visit our Wiki.
+* Initializing Xasu: https://github.com/e-ucm/xasu/wiki/Working-with-Xasu#initialization
 
 ## Sending your first xAPI statement
 
@@ -131,23 +137,13 @@ If you want to learn more about how to send statements using Xasu please visit o
 
 Before the game is closed, Xasu has to be finalized manually so its processors (online, offline or backup) perform their final tasks.
 
-These tasks include:
-* Flushing all the queues in all processors.
-* Sending all the online/fallback pending traces to the LRS (forcely requires internet connection to continue).
-* Submitting the trace backup to the backup endpoint.
-* Closing all the opened logs and connections.
-
-To finalize Xasu, the Finalize function is used. The finalization progress can be measured using the IProgress interface.
 ```cs
-    var progress = new Progress<float>();
-    progress.ProgressChanged += (_, p) =>
-    {
-        Debug.Log("Finalization progress: " + p);
-    };
-    await Xasu.Instance.Finalize(progress);
-    Debug.Log("Tracker finalized");
-    Application.Quit();
+    await Xasu.Instance.Finalize();
+    Debug.Log("Tracker finalized, game is now ready to close...");
 ```
+
+If you want to learn more about how to finalize Xasu please visit our Wiki.
+* Finalizing Xasu: https://github.com/e-ucm/xasu/wiki/Working-with-Xasu#finalizing-xasu
 
 # Important links
 
