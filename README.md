@@ -1,5 +1,7 @@
 # Xasu - xAPI Analytics Supplier
 
+<img src="https://user-images.githubusercontent.com/3171485/173609418-2cc2def0-2631-4c1a-adeb-b68e072a02e0.png" width="300px" height="300px">
+
 The Xasu (xAPI Analytics Supplier) is a Unity (https://unity.com/) asset that simplifies use of [xAPI](https://xapi.com/) Learning Analytics from Unity with straightforward cmi5 support.
 
 Xasu is a *tracker*, which, when integrated into a game, can send and/or store player interactions for later analysis. This is especially important when proving that a serious game is effective at its goal, be it teaching, training, or changing the players' perspective on real-world issues. As a tracker, Xasu simplifies the work of serious games developers (or of any application using LA) by providing both simple tracking and multipe quality-of-life utilities with which to configure the collection of xAPI traces in a flexible and robust way. Xasu has been developed by the [e-UCM group](https://www.e-ucm.es) and is part of the e-UCM ecosystem of tools for Learning Analytics (Simva, T-mon, Pumva, μfasa and Xasu).
