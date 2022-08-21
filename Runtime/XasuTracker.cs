@@ -143,7 +143,7 @@ namespace Xasu
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
-                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User" };
+                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
 
                 traceProcessors = processors.ToArray();
 
