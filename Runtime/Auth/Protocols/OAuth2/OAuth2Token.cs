@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Xasu.Auth.Protocols.OAuth2
 {
-    internal class OAuth2Token
+    public class OAuth2Token
     {
         private Dictionary<string, object> decodedJWT;
         private string access_token;
