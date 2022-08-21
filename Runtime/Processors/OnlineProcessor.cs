@@ -423,5 +423,11 @@ namespace Xasu.Processors
                 State = ProcessorState.Working;
             }
         }
+
+        public override Task Reset()
+        {
+            State = hasFallbackTraces ? ProcessorState.Fallback : ProcessorState.Working;
+            return Task.FromResult(true);
+        }
     }
 }

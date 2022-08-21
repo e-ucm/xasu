@@ -3,12 +3,14 @@ using Newtonsoft.Json.Linq;
 using Polly;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using TinCan;
 using UnityEngine;
 using Xasu.Auth.Protocols;
 using Xasu.Config;
+using Xasu.Exceptions;
 using Xasu.Requests;
 
 namespace Xasu.Processors

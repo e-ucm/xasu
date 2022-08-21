@@ -299,6 +299,18 @@ namespace Xasu
                 }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
+        public async Task ResetState()
+        {
+            foreach(var p in traceProcessors)
+            {
+                await p.Reset();
+            }
+
+            Status.InitException = null;
+            Status.LoopException = null;
+            Status.FinalizeException = null;
+        }
+
 
         #region Private Methods
 
