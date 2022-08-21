@@ -66,7 +66,7 @@ namespace Xasu
             await Init(await TrackerConfigLoader.LoadLocalAsync());
         }
 
-        public async Task Init(TrackerConfig trackerConfig)
+        public async Task Init(TrackerConfig trackerConfig, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null)
         {
             try
             {
@@ -83,8 +83,8 @@ namespace Xasu
                 // TODO: Implement a ProcessorFactory that performs generic initialization
                 if (TrackerConfig.Online)
                 {
-                    onlineAuthProtocol = await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null); // TODO: Auth Policies
-                    if (onlineAuthProtocol.State == AuthState.Errored)
+                    onlineAuthProtocol = onlineAuthorization ?? await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null); // TODO: Auth Policies
+                    if (onlineAuthProtocol?.State == AuthState.Errored)
                     {
                         LogError("[TRACKER] Failed to initialize auth for LRS: " + onlineAuthProtocol.ErrorMessage);
                         return;
@@ -117,7 +117,11 @@ namespace Xasu
 
                 if (TrackerConfig.Backup)
                 {
-                    if (!string.IsNullOrEmpty(TrackerConfig.BackupAuthProtocol))
+                    if(backupAuthorization != null)
+                    {
+                        backupAuthProtocol = backupAuthorization;
+                    }
+                    else if (!string.IsNullOrEmpty(TrackerConfig.BackupAuthProtocol))
                     {
                         backupAuthProtocol = TrackerConfig.BackupAuthProtocol == "same" 
                             ? onlineAuthProtocol 
@@ -162,6 +166,7 @@ namespace Xasu
             {
                 Status.InitException = ex;
                 LogError("[TRACKER] Init exception!", ex);
+                throw;
             }
             
         }
@@ -215,6 +220,7 @@ namespace Xasu
             {
                 Status.FinalizeException = ex;
                 LogError("[TRACKER] Finalize failed!", ex);
+                throw;
             }
         }
 
