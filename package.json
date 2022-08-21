@@ -12,5 +12,17 @@
         "name": "e-UCM Learning Group",
         "email": "info@e-ucm.es",
         "url": "https://github.com/e-ucm/xasu"
-    }
+    },
+    "samples": [
+        {
+            "displayName": "Simple Tester",
+            "description": "Contains a simple tracker tester.",
+            "path": "Samples~/SimpleTester"
+        },
+        {
+            "displayName": "Complete Tester With cmi5",
+            "description": "Contains a simple scene with a testing interface and a cmi5 control panel.",
+            "path": "Samples~/CompleteTesterWithCmi5"
+        }
+    ]
 }

@@ -28,9 +28,7 @@ namespace Xasu.Requests
                     request = UnityWebRequest.Post(myRequest.url, "");
                     break;
                 case "PUT":
-                    Debug.Log("About to create put request to: " + myRequest.url);
                     request = UnityWebRequest.Put(myRequest.url, myRequest.content);
-                    Debug.Log("About to put: " + Encoding.UTF8.GetString(myRequest.content));
                     break;
                 case "DELETE":
                     request = UnityWebRequest.Delete(myRequest.url);
