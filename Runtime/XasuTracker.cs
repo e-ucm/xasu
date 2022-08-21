@@ -131,11 +131,11 @@ namespace Xasu
                     }
 
                     Debug.Log("[TRACKER] Initializing backup processor...");
-                    backupProcessor = new BackupProcessor(TrackerConfig.BackupTraceFormat, TrackerConfig.BackupEndpoint,
-                        TrackerConfig.BackupRequestConfig, backupAuthProtocol, null); // TODO: Backup policy
+                    backupProcessor = new BackupProcessor(TrackerConfig.BackupFileName, TrackerConfig.BackupTraceFormat, 
+                        TrackerConfig.BackupEndpoint, TrackerConfig.BackupRequestConfig, backupAuthProtocol, null); // TODO: Backup policy
 
-                    await localProcessor.Init();
-                    processors.Add(localProcessor);
+                    await backupProcessor.Init();
+                    processors.Add(backupProcessor);
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
