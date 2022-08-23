@@ -39,6 +39,8 @@ namespace Xasu.Processors
 
         public int TracesToFallback = 0, TracesFromFallbackSent = 0, TracesFromFallbackFailed = 0;
 
+        public override int TracesPending { get { return base.TracesPending + TracesToFallback - (TracesFromFallbackSent + TracesFromFallbackFailed); } }
+
         public OnlineProcessor(Uri lrsEndpoint, TCAPIVersion version, int batchSize, IAuthProtocol authProtocol,
             bool fallback) : this(lrsEndpoint.ToString(), version, batchSize, authProtocol, fallback)
         {
@@ -221,14 +223,14 @@ namespace Xasu.Processors
         public override async Task Finalize(IProgress<float> progress)
         {
             progress?.Report(0);
-            float total = localQueue.Size;
+            float total = TracesPending;
 
             // Asynchronous processing
             var task = Process(true);
-            while (localQueue.Size > 0 && !task.IsCompleted)
+            while ((hasFallbackTraces || TracesPending > 0) && !task.IsCompleted)
             {
                 await Task.Yield();
-                progress?.Report((total - localQueue.Size) / total);
+                progress?.Report((total - TracesPending) / total);
             }
         }
 
