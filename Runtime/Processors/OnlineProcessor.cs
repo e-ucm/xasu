@@ -198,7 +198,7 @@ namespace Xasu.Processors
                     } while (complete && localQueue.Size > 0);
                 }
 
-                // When requesting a complete flush traces can be stored in fallback, but finalize has to stop, so we must raise an exception
+                // When requesting a complete flush traces can be stored in fallback, but finalize has to stop, and we must raise an exception
                 if (complete && !CircuitsClosed())
                 {
                     if (apiCircuitBreaker.CircuitState == CircuitState.Open || apiCircuitBreaker.CircuitState == CircuitState.Isolated)
@@ -222,6 +222,9 @@ namespace Xasu.Processors
 
         public override async Task Finalize(IProgress<float> progress)
         {
+            // Reset the circuits in case they are closed
+            ResetCircuits();
+
             progress?.Report(0);
             float total = TracesPending;
 
@@ -429,7 +432,14 @@ namespace Xasu.Processors
         public override Task Reset()
         {
             State = hasFallbackTraces ? ProcessorState.Fallback : ProcessorState.Working;
+            ResetCircuits();
             return Task.FromResult(true);
+        }
+
+        private void ResetCircuits()
+        {
+            networkCircuitBreaker.Reset();
+            apiCircuitBreaker.Reset();
         }
     }
 }
