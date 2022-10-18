@@ -211,7 +211,7 @@ namespace Xasu.HighLevel
             }
 
             // Get the initialized statement time to calculate the duration
-            TimeSpan duration = hasDuration ? TimeSpan.FromSeconds(durationInSeconds) : initializedTimes[completableId] - DateTime.Now;
+            TimeSpan duration = hasDuration ? TimeSpan.FromSeconds(durationInSeconds) : DateTime.Now - initializedTimes[completableId];
             if (initializedTimes.ContainsKey(completableId))
             {
                 initializedTimes.Remove(completableId);
