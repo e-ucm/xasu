@@ -217,14 +217,17 @@ namespace Xasu.HighLevel
                 initializedTimes.Remove(completableId);
             }
 
+            var result = new Result{ completion = true };
+            if (!hasDuration || durationInSeconds > 0f)
+            {
+                result.duration = duration;
+            }
+
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Completed),
                 target = GetTargetActivity(completableId, type),
-                result = new Result
-                {
-                    completion = true
-                }
+                result = result
             });
         }
 
