@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TinCan;
 using UnityEngine;
+using Xasu.Util;
 
 namespace Xasu.HighLevel
 {
@@ -51,35 +52,7 @@ namespace Xasu.HighLevel
             var jObject = traceExtensions.ToJObject(TinCan.TCAPIVersion.V103);
             foreach (var stateExtension in extensions)
             {
-                var key = new System.Uri(stateExtension.Key).ToString();
-                if (jObject.ContainsKey(key))
-                {
-                    var valueType = jObject.GetValue(key).Type;
-                    // In case it stores the same string value
-                    if (valueType == Newtonsoft.Json.Linq.JTokenType.String
-                        && jObject.Value<string>(key).Equals(stateExtension.Value.ToString())) 
-                    {
-                        continue;
-                    }
-
-                    // In case it stores the same int value
-                    if (valueType == Newtonsoft.Json.Linq.JTokenType.Integer
-                        && jObject.Value<int>(key).ToString().Equals(stateExtension.Value.ToString()))
-                    {
-                        continue;
-                    }
-                }
-
-                MoveToOldIfPresent(jObject, key);
-
-                if (stateExtension.Value is int)
-                {
-                    jObject.Add(key, (int)stateExtension.Value);
-                }
-                else
-                {
-                    jObject.Add(key, stateExtension.Value.ToString());
-                }
+                ExtensionUtil.AddExtensionToJObject(stateExtension, jObject);
             }
 
             try
@@ -98,18 +71,6 @@ namespace Xasu.HighLevel
                     Debug.LogException(ex);
                 }
                 return traceExtensions;
-            }
-        }
-
-        private void MoveToOldIfPresent(Newtonsoft.Json.Linq.JObject jObject, string key)
-        {
-            if (jObject.ContainsKey(key))
-            {
-                var value = jObject.GetValue(key);
-                var newKey = key + "_old/";
-                jObject.Remove(key);
-                MoveToOldIfPresent(jObject, newKey);
-                jObject[newKey] = value;
             }
         }
     }
