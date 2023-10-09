@@ -14,7 +14,7 @@ namespace Xasu.Config
         [JsonProperty("strict_mode")]
         public bool StrictMode { get; set; }
         [JsonProperty("flush_interval")]
-        public float FlushInterval { get; set; }
+        public float FlushInterval { get; set; } = 1f;
         [JsonProperty("simva")]
         public bool Simva { get; set; }
 
@@ -22,7 +22,7 @@ namespace Xasu.Config
         [JsonProperty("online")]
         public bool Online { get; set; }
         [JsonProperty("batch_size")]
-        public int BatchSize { get; set; }
+        public int BatchSize { get; set; } = 32;
         [JsonProperty("lrs_endpoint")]
         public string LRSEndpoint { get; set; }
         [JsonProperty("fallback")]
