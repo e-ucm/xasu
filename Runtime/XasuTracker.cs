@@ -371,7 +371,7 @@ namespace Xasu
             // Set the timestamp
             if (statement.timestamp == null || !statement.timestamp.HasValue)
             {
-                statement.timestamp = DateTime.Now;
+                statement.timestamp = DateTime.UtcNow;
             }
 
             if (statement.context == null)
