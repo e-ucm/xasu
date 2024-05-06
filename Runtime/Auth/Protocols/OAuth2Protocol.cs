@@ -288,6 +288,7 @@ namespace Xasu.Auth.Protocols
             {
                 form.Add(param.Key, param.Value);
             }
+            // TODO add here &token if SIMVA and token variable
 
             // TODO: We might need to manually encode the form
 
