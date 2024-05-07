@@ -128,7 +128,11 @@ namespace Xasu.Auth.Protocols
                 Debug.Log("[OAuth2] Token obtained: " + token.AccessToken);
                 Agent = new Agent
                 {
-                    name = token.Username
+                    name = token.Username,
+                    account = new AgentAccount {
+                        homePage = tokenEndpoint,
+                        name = token.Username
+                    }
                 };
             }
         }
