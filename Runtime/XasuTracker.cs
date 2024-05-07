@@ -145,7 +145,12 @@ namespace Xasu
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
-
+                
+                Activity sg = new Activity  { id = "https://w3id.org/xapi/seriousgames" };
+                List<Activity> list = new List<Activity>();
+                list.Add(sg);
+                DefaultContext = new Context { registration = Guid.NewGuid(),contextActivities=new ContextActivities{ category = list } };
+                
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
