@@ -130,7 +130,7 @@ namespace Xasu.Auth.Protocols
                 {
                     name = token.Username,
                     account = new AgentAccount {
-                        homePage = tokenEndpoint,
+                        homePage = authEndpoint,
                         name = token.Username
                     }
                 };
