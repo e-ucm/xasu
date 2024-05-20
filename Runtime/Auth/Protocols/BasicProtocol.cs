@@ -19,6 +19,7 @@ namespace Xasu.Auth.Protocols
         private readonly string usernameField = "username";
         private readonly string passwordField = "password";
         private readonly string realmField = "realm";
+        private readonly string LRSEndpointField = "lrs_endpoint";
         private string token;
         private string realm;
 
@@ -41,9 +42,14 @@ namespace Xasu.Auth.Protocols
             {
                 throw new MissingFieldException(string.Format(fieldMissingMessage, passwordField));
             }
+            if (!config.ContainsKey(LRSEndpointField))
+            {
+                throw new MissingFieldException(string.Format(fieldMissingMessage, LRSEndpointField));
+            }
 
             var username = config.Value(usernameField);
             var password = config.Value(passwordField);
+            var lrsendpoint = config.Value(LRSEndpointField);
 
             if (config.ContainsKey(realmField))
             {
@@ -55,7 +61,7 @@ namespace Xasu.Auth.Protocols
             {
                 name = username,
                 account = new AgentAccount {
-                    homePage = realm,
+                    homePage = lrsendpoint,
                     name = username
                 }
             };

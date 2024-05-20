@@ -84,6 +84,10 @@ namespace Xasu
                 // TODO: Implement a ProcessorFactory that performs generic initialization
                 if (TrackerConfig.Online)
                 {
+                    if (!TrackerConfig.AuthParameters.ContainsKey("lrs_endpoint"))
+                    {
+                        TrackerConfig.AuthParameters["lrs_endpoint"] = TrackerConfig.LRSEndpoint;
+                    }
                     onlineAuthProtocol = onlineAuthorization ?? await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null); // TODO: Auth Policies
                     if (onlineAuthProtocol?.State == AuthState.Errored)
                     {
