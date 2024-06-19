@@ -51,12 +51,13 @@ public class SendTrace : MonoBehaviour
     public async void Completed()
     {
         completed.interactable = false;
-        await CompletableTracker.Instance.Progressed("MyGame", CompletableTracker.CompletableType.Game, 0.5f);
+        await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(false);
         completed.interactable = true;
     }
     public async void Finalized()
     {
         finalized.interactable = false;
+        await CompletableTracker.Instance.Progressed("MyGame", CompletableTracker.CompletableType.Game, 1f);
         await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(true);
         buttons.interactable = false;
     }

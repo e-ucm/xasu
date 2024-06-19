@@ -17,6 +17,8 @@ namespace Xasu.Config
         public float FlushInterval { get; set; } = 1f;
         [JsonProperty("simva")]
         public bool Simva { get; set; }
+        [JsonProperty("token")]
+        public bool Token { get; set; }
 
         // LRS Settings (Online)
         [JsonProperty("online")]
