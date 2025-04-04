@@ -65,6 +65,8 @@ namespace Xasu.Config
         public TrackerConfig()
         {
             LRSEndpoint = "https://localhost:443/";
+            AuthParameters=new Dictionary<string, string>();
+            BackupAuthParameters=new Dictionary<string, string>();
         }
 
     }
