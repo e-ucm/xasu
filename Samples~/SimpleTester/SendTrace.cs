@@ -68,5 +68,12 @@ public class SendTrace : MonoBehaviour
         await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(true);
         Debug.Log("Done!");
         buttons.interactable = false;
+        if (Application.isEditor) {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        } else {
+            Application.Quit();
+        }
     }
 }
