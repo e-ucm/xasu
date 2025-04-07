@@ -37,28 +37,36 @@ public class SendTrace : MonoBehaviour
     public async void Interacted()
     {
         interacted.interactable = false;
+        Debug.Log("Sending Interacted trace");
         await GameObjectTracker.Instance.Interacted("boton-principal");
+        Debug.Log("Done!");
         interacted.interactable = true;
     }
 
     public async void Progressed()
     {
         progressed.interactable = false;
+        Debug.Log("Sending Progressed trace");
         await CompletableTracker.Instance.Progressed("MyGame", CompletableTracker.CompletableType.Game, 0.5f);
+        Debug.Log("Done!");
         progressed.interactable = true;
 
     }
     public async void Completed()
     {
         completed.interactable = false;
+        Debug.Log("Sending Completed trace");
         await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(false);
+        Debug.Log("Done!");
         completed.interactable = true;
     }
     public async void Finalized()
     {
         finalized.interactable = false;
+        Debug.Log("Sending Finalize trace");
         await CompletableTracker.Instance.Progressed("MyGame", CompletableTracker.CompletableType.Game, 1f);
         await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(true);
+        Debug.Log("Done!");
         buttons.interactable = false;
     }
 }
