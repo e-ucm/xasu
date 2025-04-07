@@ -27,7 +27,7 @@ Please find the full Xasu documentation in the Wiki section of this project.
 
 # Quick Start Guide
 
-Xasu requires at least **Unity 2019.4 (LTS)**.
+Xasu requires at least **Unity 2022.3 (LTS)**.
 
 ## Installation
 
@@ -91,7 +91,7 @@ Please visit our Wiki to get more details on using cmi5 in Xasu.
 
 ## Adding Xasu to your game
 
-Once Xasu is installed and configured, to add Xasu to your game you just have to create a new GameObject in Unity and include the Xasu component.
+Once Xasu is installed, to add Xasu to your game you just have to create a new GameObject in Unity and include the Xasu component.
 
 If you want to know more about how Xasu works, please check the Wiki:
 * Working with Xasu: https://github.com/e-ucm/xasu/wiki/Working-with-Xasu
@@ -100,7 +100,8 @@ If you want to know more about how Xasu works, please check the Wiki:
 
 When Xasu is added to your scene it won't initialize and connect by default. 
 
-To initialize it automatically, please check the "AutoStart" property in the object inspector.
+To initialize it automatically, please check the "Auto Start" property in the object inspector.
+You can also check "Enable Debug Log" to display debug logs in Unity console.
 
 ![image](https://user-images.githubusercontent.com/3171485/173599958-9dbafc4b-81ba-466c-a58f-2efe7e0fa59f.png)
 
