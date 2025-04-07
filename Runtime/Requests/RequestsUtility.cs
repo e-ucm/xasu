@@ -138,7 +138,7 @@ namespace Xasu.Requests
             }
             catch (APIException ex)
             {
-                Debug.Log(string.Format("[REQUESTS ({0})] I've seen API exceptions here... ", Thread.CurrentThread.ManagedThreadId));
+                XasuTracker.Instance.Log(string.Format("[REQUESTS ({0})] I've seen API exceptions here... ", Thread.CurrentThread.ManagedThreadId));
                 result = new MyHttpResponse()
                 {
                     status = (int)ex.Request.responseCode,
@@ -150,7 +150,7 @@ namespace Xasu.Requests
             }
             catch (NetworkException)
             {
-                Debug.Log(string.Format("[REQUESTS ({0})] I've seen network exceptions here... ", Thread.CurrentThread.ManagedThreadId));
+                XasuTracker.Instance.Log(string.Format("[REQUESTS ({0})] I've seen network exceptions here... ", Thread.CurrentThread.ManagedThreadId));
                 throw;
             }
 
@@ -183,7 +183,7 @@ namespace Xasu.Requests
                 Application.runInBackground = true;
             }
 
-            Debug.Log(string.Format("[REQUESTS ({2})] {1} Requesting \"{0}\"", webRequest.url, webRequest.method, Thread.CurrentThread.ManagedThreadId));
+            XasuTracker.Instance.Log(string.Format("[REQUESTS ({2})] {1} Requesting \"{0}\"", webRequest.url, webRequest.method, Thread.CurrentThread.ManagedThreadId));
             asyncRequest = webRequest.SendWebRequest();
 
             if (inBackground)
@@ -233,7 +233,7 @@ namespace Xasu.Requests
                 throw new BackgroundException(backgroundError);
             }
 
-            Debug.Log(string.Format("[REQUESTS ({4})] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
+            XasuTracker.Instance.Log(string.Format("[REQUESTS ({4})] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
                 webRequest.url, webRequest.method, webRequest.responseCode, webRequest.downloadHandler.text, Thread.CurrentThread.ManagedThreadId));
 
             return webRequest;

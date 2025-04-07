@@ -77,7 +77,7 @@ namespace Xasu.Auth.Protocols
         {
             initConfig = config;
 
-            Debug.Log("[OAuth2] Starting");
+            XasuTracker.Instance.Log("[OAuth2] Starting");
             // Main params
             tokenEndpoint = config.GetRequiredValue(tokenEndpointField, fieldMissingMessage);
             grantType = config.GetRequiredValue(grantTypeField, fieldMissingMessage).ToLower();
@@ -131,7 +131,7 @@ namespace Xasu.Auth.Protocols
 
             if(token != null)
             {
-                Debug.Log("[OAuth2] Token obtained: " + token.AccessToken);
+                XasuTracker.Instance.Log("[OAuth2] Token obtained: " + token.AccessToken);
                 Agent = new Agent
                 {
                     name = token.Username,

@@ -109,7 +109,7 @@ namespace Xasu.HighLevel
                 }
                 else
                 {
-                    Debug.LogWarning("The initialized statement for the specified id has already been sent!");
+                    XasuTracker.Instance.LogWarning("The initialized statement for the specified id has already been sent!");
                     addInitializedTime = false;
                 }
             }
@@ -205,7 +205,7 @@ namespace Xasu.HighLevel
                 {
                     hasDuration = true;
                     durationInSeconds = 0f;
-                    Debug.LogWarning("The completed statement for the specified id has not been initialized and" +
+                    XasuTracker.Instance.LogWarning("The completed statement for the specified id has not been initialized and" +
                         " therefore the duration is going to be 0.");
                 }
             }

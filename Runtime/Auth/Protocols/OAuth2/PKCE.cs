@@ -17,7 +17,7 @@ namespace Xasu.Auth.Protocols.OAuth2
         {
             if (WebGLUtility.IsWebGLListening())
             {
-                Debug.Log("Getting saved PKCE");
+                XasuTracker.Instance.Log("Getting saved PKCE");
                 codeVerifier = PlayerPrefs.GetString(pkceCodeVerifierKey);
                 codeChallenge = PlayerPrefs.GetString(pkceCodeChallengeKey);
                 return;
