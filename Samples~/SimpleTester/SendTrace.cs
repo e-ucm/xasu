@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using Xasu;
 using Xasu.HighLevel;
-using System.Threading.Tasks;
-using UnityEngine.UI;
 
 public class SendTrace : MonoBehaviour
 {
@@ -68,6 +69,13 @@ public class SendTrace : MonoBehaviour
         await CompletableTracker.Instance.Completed("MyGame", CompletableTracker.CompletableType.Game).WithSuccess(true);
         Debug.Log("Done!");
         buttons.interactable = false;
+        var progress = new Progress<float>();
+        progress.ProgressChanged += (_, p) =>
+        {
+            Debug.Log("Finalization progress: " + p);
+        };
+        await Xasu.XasuTracker.Instance.Finalize(progress);
+        Debug.Log("Tracker finalized, game is now ready to close...");
         if (Application.isEditor) {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

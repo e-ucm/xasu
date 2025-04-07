@@ -140,7 +140,26 @@ If you want to learn more about how to send statements using Xasu please visit o
 Before the game is closed, Xasu has to be finalized manually so its processors (online, offline or backup) perform their final tasks.
 
 ```cs
-    await Xasu.Instance.Finalize();
+    using System.Collections;
+    var progress = new Progress<float>();
+    progress.ProgressChanged += (_, p) =>
+    {
+        Debug.Log("Finalization progress: " + p);
+    };
+    await Xasu.XasuTracker.Instance.Finalize(progress);
+    Debug.Log("Tracker finalized, game is now ready to close...");
+```
+
+or 
+
+```cs
+    using System.Collections;
+    var progress = new Progress<float>();
+    progress.ProgressChanged += (_, p) =>
+    {
+        Debug.Log("Finalization progress: " + p);
+    };
+    await FindObjectOfType<XasuTracker>().Finalize(progress);
     Debug.Log("Tracker finalized, game is now ready to close...");
 ```
 
