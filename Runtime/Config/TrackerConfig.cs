@@ -25,6 +25,8 @@ namespace Xasu.Config
         public bool Online { get; set; }
         [JsonProperty("batch_size")]
         public int BatchSize { get; set; } = 32;
+        [JsonProperty("homepage")]
+        public string HomePage { get; set; }
         [JsonProperty("lrs_endpoint")]
         public string LRSEndpoint { get; set; }
         [JsonProperty("fallback")]

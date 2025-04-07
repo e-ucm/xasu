@@ -37,7 +37,7 @@ namespace Xasu.Auth.Protocols
         private const string loginHintField = "login_hint";
         private const string tokenValueField = "simva_user_token";
         private const string codeChallengeMethodField = "code_challenge_method";
-
+        private readonly string homePageField = "homepage";
         private string authEndpoint;
         private string tokenEndpoint;
         private string grantType;
@@ -129,6 +129,11 @@ namespace Xasu.Auth.Protocols
                     throw new NotSupportedException(string.Format(unsupportedGrantTypeMessage, grantType));
             }
 
+            var homePage=authEndpoint;
+            if (config.ContainsKey(homePageField)) {
+                homePage = config.Value(homePageField);
+            }
+
             if(token != null)
             {
                 XasuTracker.Instance.Log("[OAuth2] Token obtained: " + token.AccessToken);
@@ -136,7 +141,7 @@ namespace Xasu.Auth.Protocols
                 {
                     name = token.Username,
                     account = new AgentAccount {
-                        homePage = authEndpoint,
+                        homePage = homePage,
                         name = token.Username
                     }
                 };

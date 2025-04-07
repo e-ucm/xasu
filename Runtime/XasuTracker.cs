@@ -92,6 +92,10 @@ namespace Xasu
                     {
                         TrackerConfig.AuthParameters["lrs_endpoint"] = TrackerConfig.LRSEndpoint;
                     }
+                    if (!TrackerConfig.AuthParameters.ContainsKey("homepage"))
+                    {
+                        TrackerConfig.AuthParameters["homepage"] = TrackerConfig.HomePage;
+                    }
                     onlineAuthProtocol = onlineAuthorization ?? await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null); // TODO: Auth Policies
                     if (onlineAuthProtocol?.State == AuthState.Errored)
                     {
