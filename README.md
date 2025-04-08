@@ -59,6 +59,7 @@ The following configuration file represents the minimal tracker configuration re
 ```json
 {
     "online": "true",
+    "homepage": "<user-homePage-url-for-actor-in-traces>",
     "lrs_endpoint": "<your-lrs-endpoint>",
     "auth_protocol": "basic", 
     "auth_parameters": {
@@ -103,7 +104,7 @@ When Xasu is added to your scene it won't initialize and connect by default.
 To initialize it automatically, please check the "Auto Start" property in the object inspector.
 You can also check "Enable Debug Log" to display debug logs in Unity console.
 
-![image](https://user-images.githubusercontent.com/3171485/173599958-9dbafc4b-81ba-466c-a58f-2efe7e0fa59f.png)
+![alt text](xasu-parameters.png)
 
 You can also initialize Xasu manually by using the ```Init``` method:
 ```cs
