@@ -91,7 +91,7 @@ namespace Xasu.Auth.Protocols
                 var authorizeResponse = await DoAuthorizeRequest(authorizeEndpoint, temporaryToken, oauthListener);
                 var doAccessTokenRequest = await DoAccessTokenRequest(accessTokenEndpoint, consumerKey, authorizeResponse);
 
-                var homePage=authorizeEndpoint;
+                var homePage = authorizeEndpoint.Replace((new Uri(authorizeEndpoint)).AbsolutePath, "");
                 if (config.ContainsKey(homePageField)) {
                     homePage = config.Value(homePageField);
                 }

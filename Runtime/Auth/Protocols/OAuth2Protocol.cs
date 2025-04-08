@@ -103,6 +103,11 @@ namespace Xasu.Auth.Protocols
             tokenValue = config.Value(tokenValueField);
             login_hint = config.Value(loginHintField);
 
+            var homePage = tokenEndpoint.Replace((new Uri(tokenEndpoint)).AbsolutePath, "");
+            if (config.ContainsKey(homePageField)) {
+                homePage = config.Value(homePageField);
+            }
+
             // Grant type specific params
             switch (grantType)
             {
@@ -127,11 +132,6 @@ namespace Xasu.Auth.Protocols
                     break;
                 default:
                     throw new NotSupportedException(string.Format(unsupportedGrantTypeMessage, grantType));
-            }
-
-            var homePage=authEndpoint;
-            if (config.ContainsKey(homePageField)) {
-                homePage = config.Value(homePageField);
             }
 
             if(token != null)

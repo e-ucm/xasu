@@ -51,7 +51,7 @@ namespace Xasu.Auth.Protocols
             var username = config.Value(usernameField);
             var password = config.Value(passwordField);
             var lrsendpoint = config.Value(LRSEndpointField);
-            var homePage=lrsendpoint;
+            var homePage= lrsendpoint.Replace((new Uri(lrsendpoint)).AbsolutePath, "");
             if (config.ContainsKey(homePageField)) {
                 homePage = config.Value(homePageField);
             }
