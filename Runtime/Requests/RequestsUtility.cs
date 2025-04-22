@@ -25,7 +25,11 @@ namespace Xasu.Requests
                     request = UnityWebRequest.Get(myRequest.url);
                     break;
                 case "POST":
+                #if UNITY_2022_2_OR_NEWER
                     request = UnityWebRequest.PostWwwForm(myRequest.url, "");
+                #else
+                    request = UnityWebRequest.Post(myRequest.url, "");
+                #endif
                     break;
                 case "PUT":
                     request = UnityWebRequest.Put(myRequest.url, myRequest.content);
@@ -208,13 +212,26 @@ namespace Xasu.Requests
             }
 
             // Sometimes the webrequest is finished but the download is not
-            while (!(webRequest.result == UnityWebRequest.Result.ConnectionError) && !(webRequest.result == UnityWebRequest.Result.ProtocolError) && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1)
+            bool webRequestResult=false;
+            while (webRequestResult)
             {
                 await Task.Yield();
+                #if UNITY_2022_2_OR_NEWER
+                    webRequestResult=(!(webRequest.result == UnityWebRequest.Result.ConnectionError) && !(webRequest.result == UnityWebRequest.Result.ProtocolError) && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1);
+                #else
+                    webRequestResult=(!webRequest.isNetworkError && !webRequest.isHttpError && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1);
+                #endif
             }
 
             // Network Error Exception
-            if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            bool networkWebRequestError=false;
+            #if UNITY_2022_2_OR_NEWER
+                networkWebRequestError=(webRequest.result == UnityWebRequest.Result.ConnectionError);
+            #else
+                // Use the old API
+                networkWebRequestError=(webRequest.isNetworkError);
+            #endif
+            if(networkWebRequestError)
             {
                 NetworkInfo.Failed();
                 throw new NetworkException(webRequest.error);
@@ -222,7 +239,15 @@ namespace Xasu.Requests
             NetworkInfo.Worked();
 
             // API / Http Exception
-            if (webRequest.result == UnityWebRequest.Result.ProtocolError)
+            // Network Error Exception
+            bool httpWebRequestError=false;
+            #if UNITY_2022_2_OR_NEWER
+                httpWebRequestError=(webRequest.result == UnityWebRequest.Result.ProtocolError);
+            #else
+                // Use the old API
+                httpWebRequestError=(webRequest.isHttpError);
+            #endif
+            if(httpWebRequestError)
             {
                 throw new APIException((int)webRequest.responseCode, webRequest.downloadHandler.text, webRequest);
             }
