@@ -77,27 +77,29 @@ public class PackageDownloader
         var buffer = new byte[1024];
         using (FileStream zipToOpen = new FileStream(CompressedFileName, FileMode.Open))
         {
-            using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Read))
-            {
-                foreach (var entry in archive.Entries)
+            #if UNITY_2022_2_OR_NEWER
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Read))
                 {
-                    var directoryName = Path.GetDirectoryName(DecompressedFileName + "/" + entry.FullName);
-                    Directory.CreateDirectory(directoryName);
-                    if (entry.FullName.EndsWith("/")) //We skip because it is a directory
-                        continue;
-                    using (var file = File.OpenWrite(DecompressedFileName + "/" + entry.FullName))
-                    using (var s = entry.Open())
+                    foreach (var entry in archive.Entries)
                     {
-                        while (s.CanRead)
+                        var directoryName = Path.GetDirectoryName(DecompressedFileName + "/" + entry.FullName);
+                        Directory.CreateDirectory(directoryName);
+                        if (entry.FullName.EndsWith("/")) //We skip because it is a directory
+                            continue;
+                        using (var file = File.OpenWrite(DecompressedFileName + "/" + entry.FullName))
+                        using (var s = entry.Open())
                         {
-                            var read = s.Read(buffer, 0, 1024);
-                            if (read == 0)
-                                break;
-                            file.Write(buffer, 0, read);
+                            while (s.CanRead)
+                            {
+                                var read = s.Read(buffer, 0, 1024);
+                                if (read == 0)
+                                    break;
+                                file.Write(buffer, 0, read);
+                            }
                         }
                     }
                 }
-            }
+            #endif
         }
     }
 }
