@@ -27,7 +27,7 @@ Please find the full Xasu documentation in the Wiki section of this project.
 
 # Quick Start Guide
 
-Xasu requires at least **Unity 2022.3 (LTS)**.
+Xasu requires at least **Unity 2019.4 (LTS)**.
 
 ## Installation
 
