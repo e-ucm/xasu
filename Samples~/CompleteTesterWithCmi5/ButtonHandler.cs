@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -287,7 +288,13 @@ public class ButtonHandler : MonoBehaviour
             Debug.Log("Finalization progress: " + p);
         };
         await FindObjectOfType<XasuTracker>().Finalize(progress);
-        Debug.Log("Tracker finalized");
-        Application.Quit();
+        Debug.Log("Tracker finalized, game is now ready to close...");
+        if (Application.isEditor) {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        } else {
+                Application.Quit();
+        }
     }
 }

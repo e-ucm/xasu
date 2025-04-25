@@ -86,14 +86,14 @@ namespace Xasu.Processors
                     writer.WriteLine(TraceFormatter.Format(t.statement, traceFormat, version));
                     toPop++;
                     TracesCompleted++;
-                    Debug.Log(string.Format("[TRACKER ({0}): {1}] Done with statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), t.statement.id));
+                    XasuTracker.Instance.Log(string.Format("[TRACKER ({0}): {1}] Done with statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), t.statement.id));
                     t.completionSource.SetResult(t.statement);
                 }
             }
             catch (IOException ex)
             {
                 TracesFailed++;
-                Debug.LogError(string.Format("[TRACKER: {0}] Failed to write statement. {1}: {2} ", this.GetType(), ex.GetType(), ex.Message));
+                XasuTracker.Instance.LogError(string.Format("[TRACKER: {0}] Failed to write statement. {1}: {2} ", this.GetType(), ex.GetType(), ex.Message));
                 traceTask.completionSource?.SetException(ex);
                 State = ProcessorState.Errored;
                 ErrorMessage = ex.ToString();

@@ -28,7 +28,7 @@ namespace Xasu.Auth.Protocols.OAuth2
             }
             else
             {
-                Debug.Log("[OAuth2] No code or session-state found, ignoring previous login attempt...");
+                XasuTracker.Instance.Log("[OAuth2] No code or session-state found, ignoring previous login attempt...");
             }
         }
 

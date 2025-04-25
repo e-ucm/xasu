@@ -77,7 +77,7 @@ namespace Xasu.Auth.Utils
             {
                 int ipcport = SimvaUriHandler.Start(uri =>
                 {
-                    Debug.Log("uri received!");
+                    XasuTracker.Instance.Log("uri received!");
                     var query = uri.Split('?')[1].Split('&');
                     var d = new Dictionary<string, string>();
                     foreach (var q in query.Select(q => q.Split('=')))
@@ -103,7 +103,7 @@ namespace Xasu.Auth.Utils
 
                 openIdListener.onAuthReceived += uri =>
                 {
-                    Debug.Log("uri received!");
+                    XasuTracker.Instance.Log("uri received!");
                     var query = uri.Split('?')[1].Split('&');
                     var d = new Dictionary<string, string>();
                     foreach (var q in query.Select(q => q.Split('=')))
@@ -127,7 +127,7 @@ namespace Xasu.Auth.Utils
             {
                 if (WebGLUtility.IsWebGLListening())
                 {
-                    Debug.Log("Getting WebGLListener response from url: " + WebGLUtility.GetCompleteUrl());
+                    XasuTracker.Instance.Log("Getting WebGLListener response from url: " + WebGLUtility.GetCompleteUrl());
                     WebGLUtility.SetWebGLListening(false);
                     string queryString = new Uri(WebGLUtility.GetCompleteUrl()).Query;
 #if NET_4_6
