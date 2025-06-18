@@ -12,51 +12,11 @@ using Xasu.Util;
 
 namespace Xasu.Requests
 {
-    public static class RequestsUtility
+    public class UnityRequestHandler : IHttpRequestHandler
     {
-        private static UnityWebRequest ToWebRequest(this MyHttpRequest myRequest)
-        {
 
-            // Create the request
-            UnityWebRequest request = null;
-            switch (myRequest.method.ToUpper())
-            {
-                case "GET":
-                    request = UnityWebRequest.Get(myRequest.url);
-                    break;
-                case "POST":
-                    request = UnityWebRequest.PostWwwForm(myRequest.url, "");
-                    break;
-                case "PUT":
-                    request = UnityWebRequest.Put(myRequest.url, myRequest.content);
-                    break;
-                case "DELETE":
-                    request = UnityWebRequest.Delete(myRequest.url);
-                    break;
-            }
 
-            // Set content type
-            var contentType = GetContentType(myRequest);
-            if (myRequest.content != null && myRequest.content.Length > 0)
-            {
-                //byte[] bytes = Encoding.UTF8.GetBytes(requestSettings.body);
-                request.uploadHandler = new UploadHandlerRaw(myRequest.content)
-                {
-                    contentType = contentType
-                };
-            }
-
-            // Set other headers
-            myRequest.headers["Content-Type"] = contentType;
-            foreach (var header in myRequest.headers)
-            {
-                request.SetRequestHeader(header.Key, header.Value);
-            }
-
-            return request;
-        }
-
-        public static async Task<MyHttpResponse> DoRequest(MyHttpRequest myRequest, IProgress<float> progress = null)
+        public async Task<MyHttpResponse> SendRequest(MyHttpRequest myRequest, IProgress<float> progress = null)
         {
             bool isSimvaStatements = false;
             // Simva Special cases
@@ -84,7 +44,7 @@ namespace Xasu.Requests
 
             // Set query params
             string qs = string.Empty;
-            qs = RequestsUtility.AppendParamsToExistingQueryString(qs, myRequest.queryParams);
+            qs = AppendParamsToExistingQueryString(qs, myRequest.queryParams);
             if (!string.IsNullOrEmpty(qs))
             {
                 myRequest.url += "?" + qs;
@@ -106,13 +66,13 @@ namespace Xasu.Requests
                 {
                     webResult = await myRequest.policy.ExecuteAsync(
                         async (_) => {
-                            return await RequestsUtility.DoRequest(myRequest.ToWebRequest());
+                            return await DoRequest(myRequest.ToWebRequest());
                             }
                         , new CancellationToken(), true);
                 }
                 else
                 {
-                    webResult = await RequestsUtility.DoRequest(myRequest.ToWebRequest());
+                    webResult = await DoRequest(myRequest.ToWebRequest());
                 }
 
                 var responseData = webResult.downloadHandler.data;
@@ -139,14 +99,7 @@ namespace Xasu.Requests
             catch (APIException ex)
             {
                 Debug.Log(string.Format("[REQUESTS ({0})] I've seen API exceptions here... ", Thread.CurrentThread.ManagedThreadId));
-                result = new MyHttpResponse()
-                {
-                    status = (int)ex.Request.responseCode,
-                    content = ex.Request.downloadHandler.data,
-                    contentType = ex.Request.GetResponseHeader("Content-Type"),
-                    etag = ex.Request.GetRequestHeader("Etag"),
-                    ex = ex
-                };
+                result = ex.Response;
             }
             catch (NetworkException)
             {
@@ -224,7 +177,15 @@ namespace Xasu.Requests
             // API / Http Exception
             if (webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
-                throw new APIException((int)webRequest.responseCode, webRequest.downloadHandler.text, webRequest);
+                var httpResponse = new MyHttpResponse()
+                {
+                    status = (int)webRequest.responseCode,
+                    content = webRequest.downloadHandler.data,
+                    contentType = webRequest.GetResponseHeader("Content-Type"),
+                    etag = webRequest.GetRequestHeader("Etag")
+                };
+
+                throw new APIException((int)webRequest.responseCode, webRequest.downloadHandler.text, httpResponse);
             }
 
             // Background exclussive errors
@@ -240,7 +201,7 @@ namespace Xasu.Requests
         }
 
 
-        public static string AppendParamsToExistingQueryString(string currentQueryString, IEnumerable<KeyValuePair<string, string>> parameters)
+        public string AppendParamsToExistingQueryString(string currentQueryString, IEnumerable<KeyValuePair<string, string>> parameters)
         {
             foreach (KeyValuePair<String, String> entry in parameters)
             {
@@ -258,19 +219,5 @@ namespace Xasu.Requests
             return currentQueryString;
         }
 
-        private static string GetContentType(MyHttpRequest req)
-        {
-            var contentType = "application/octet-stream";
-            if (!string.IsNullOrEmpty(req.contentType))
-            {
-                contentType = req.contentType;
-            }
-            else if (req.headers.ContainsKey("Content-Type"))
-            {
-                contentType = req.headers["Content-Type"];
-            }
-
-            return contentType;
-        }
     }
 }
