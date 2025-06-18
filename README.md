@@ -59,6 +59,7 @@ The following configuration file represents the minimal tracker configuration re
 ```json
 {
     "online": "true",
+    "homepage": "<user-homePage-url-for-actor-in-traces>",
     "lrs_endpoint": "<your-lrs-endpoint>",
     "auth_protocol": "basic", 
     "auth_parameters": {
@@ -91,7 +92,7 @@ Please visit our Wiki to get more details on using cmi5 in Xasu.
 
 ## Adding Xasu to your game
 
-Once Xasu is installed and configured, to add Xasu to your game you just have to create a new GameObject in Unity and include the Xasu component.
+Once Xasu is installed, to add Xasu to your game you just have to create a new GameObject in Unity and include the Xasu component.
 
 If you want to know more about how Xasu works, please check the Wiki:
 * Working with Xasu: https://github.com/e-ucm/xasu/wiki/Working-with-Xasu
@@ -100,9 +101,10 @@ If you want to know more about how Xasu works, please check the Wiki:
 
 When Xasu is added to your scene it won't initialize and connect by default. 
 
-To initialize it automatically, please check the "AutoStart" property in the object inspector.
+To initialize it automatically, please check the "Auto Start" property in the object inspector.
+You can also check "Enable Debug Log" to display debug logs in Unity console.
 
-![image](https://user-images.githubusercontent.com/3171485/173599958-9dbafc4b-81ba-466c-a58f-2efe7e0fa59f.png)
+![alt text](xasu-parameters.png)
 
 You can also initialize Xasu manually by using the ```Init``` method:
 ```cs
@@ -140,7 +142,26 @@ If you want to learn more about how to send statements using Xasu please visit o
 Before the game is closed, Xasu has to be finalized manually so its processors (online, offline or backup) perform their final tasks.
 
 ```cs
-    await Xasu.Instance.Finalize();
+    using System.Collections;
+    var progress = new Progress<float>();
+    progress.ProgressChanged += (_, p) =>
+    {
+        Debug.Log("Finalization progress: " + p);
+    };
+    await Xasu.XasuTracker.Instance.Finalize(progress);
+    Debug.Log("Tracker finalized, game is now ready to close...");
+```
+
+or 
+
+```cs
+    using System.Collections;
+    var progress = new Progress<float>();
+    progress.ProgressChanged += (_, p) =>
+    {
+        Debug.Log("Finalization progress: " + p);
+    };
+    await FindObjectOfType<XasuTracker>().Finalize(progress);
     Debug.Log("Tracker finalized, game is now ready to close...");
 ```
 

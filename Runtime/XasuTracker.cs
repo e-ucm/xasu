@@ -20,6 +20,7 @@ namespace Xasu
     {
         private IHttpRequestHandler requestHandler;
         public bool AutoStart = false;
+        public bool EnableDebugLogging = false;
 
         public float processingLoopTime = 1; // In Seconds
 
@@ -70,11 +71,14 @@ namespace Xasu
         }
 #endif
 
-        public async Task Init(TrackerConfig trackerConfig,  IHttpRequestHandler requestHandler, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null)
+        public async Task Init(TrackerConfig trackerConfig,  IHttpRequestHandler requestHandler, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null, bool EnableLogs=false)
         {
+            if(!EnableLogs == false) {
+                EnableDebugLogging=EnableLogs;
+            }
             try
             {
-                Debug.Log("[TRACKER] Initializing...");
+                Log("[TRACKER] Initializing...");
 
                 TrackerConfig = trackerConfig;
                 errorLogFilename = Application.persistentDataPath + "/tracker_errors.log";
@@ -91,6 +95,10 @@ namespace Xasu
                     {
                         TrackerConfig.AuthParameters["lrs_endpoint"] = TrackerConfig.LRSEndpoint;
                     }
+                    if (!TrackerConfig.AuthParameters.ContainsKey("homepage"))
+                    {
+                        TrackerConfig.AuthParameters["homepage"] = TrackerConfig.HomePage;
+                    }
                     onlineAuthProtocol = onlineAuthorization ?? await AuthFactory.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, requestHandler, null); // TODO: Auth Policies
                     if (onlineAuthProtocol?.State == AuthState.Errored)
                     {
@@ -100,12 +108,12 @@ namespace Xasu
 
                     if (onlineAuthProtocol is Cmi5Protocol)
                     {
-                        Debug.Log("[TRACKER] Initializing cmi5 online processor...");
+                        Log("[TRACKER] Initializing cmi5 online processor...");
                         onlineProcessor = new Cmi5Processor(TrackerConfig.BatchSize, onlineAuthProtocol, requestHandler, false);
                     }
                     else
                     {
-                        Debug.Log("[TRACKER] Initializing online processor...");
+                        Log("[TRACKER] Initializing online processor...");
                         onlineProcessor = new OnlineProcessor(TrackerConfig.LRSEndpoint, TCAPIVersion.V103,
                             TrackerConfig.BatchSize, onlineAuthProtocol, requestHandler, TrackerConfig.Fallback);
                     }
@@ -116,7 +124,7 @@ namespace Xasu
 
                 if (TrackerConfig.Offline)
                 {
-                    Debug.Log("[TRACKER] Initializing local processor...");
+                    Log("[TRACKER] Initializing local processor...");
                     localProcessor = new LocalProcessor(TrackerConfig.FileName, TrackerConfig.TraceFormat);
 
                     await localProcessor.Init();
@@ -142,7 +150,7 @@ namespace Xasu
                         return;
                     }
 
-                    Debug.Log("[TRACKER] Initializing backup processor...");
+                    Log("[TRACKER] Initializing backup processor...");
                     backupProcessor = new BackupProcessor(TrackerConfig.BackupFileName, TrackerConfig.BackupTraceFormat,
                         TrackerConfig.BackupEndpoint, TrackerConfig.BackupRequestConfig, requestHandler, backupAuthProtocol, null); // TODO: Backup policy
 
@@ -164,14 +172,14 @@ namespace Xasu
 
                 if (traceProcessors.Length == 0)
                 {
-                    Debug.LogWarning("[TRACKER] The tracker has been initialized with no output streams! " +
+                    LogWarning("[TRACKER] The tracker has been initialized with no output streams! " +
                         "Please active either online, offline and/or backup in the configuration!");
                 }
 
                 // Start the processing
                 if (processors.Count > 0)
                 {
-                    Debug.Log("[TRACKER] Started!");
+                    Log("[TRACKER] Started!");
                     ProcessingLoop().WrapErrors();
                 }
             }
@@ -275,12 +283,12 @@ namespace Xasu
 
             if (Status.State == TrackerState.Finalized)
             {
-                Debug.LogWarning("The tracker has been finalized. Traces enqueued won't be send!");
+                LogWarning("The tracker has been finalized. Traces enqueued won't be send!");
             }
 
             if (Status.State == TrackerState.Errored)
             {
-                Debug.LogWarning("The tracker is in an errored state. Traces won't be send! (Check the tracker status for more information)");
+                LogWarning("The tracker is in an errored state. Traces won't be send! (Check the tracker status for more information)");
             }
 
             if (statement == null)
@@ -297,13 +305,13 @@ namespace Xasu
                 {
                     if (t.IsFaulted)
                     {
-                        Debug.Log(t.Exception.GetType().ToString());
+                        Log(t.Exception.GetType().ToString());
                         LogError(string.Format("[TRACKER ({0})] Couldn't send statement with id \"{1}\".",
                             Thread.CurrentThread.ManagedThreadId, statement.id), t.Exception);
                         throw t.Exception;
                     }
 
-                    Debug.Log(string.Format("[TRACKER ({0})] All processors done with statement {1}", Thread.CurrentThread.ManagedThreadId, statement.id));
+                    Log(string.Format("[TRACKER ({0})] All processors done with statement {1}", Thread.CurrentThread.ManagedThreadId, statement.id));
 
                     // All tasks return the same statement
                     return t.Result[0];
@@ -436,7 +444,7 @@ namespace Xasu
         internal void LogError(string error, Exception ex = null)
         {
             // Output unity console log
-            Debug.LogError(error);
+            Debug.LogError("[Xasu] " + error);
             if (ex != null)
             {
                 Debug.LogException(new TrackerException(error, ex));
@@ -451,6 +459,24 @@ namespace Xasu
 
             var appendLines = ex != null ? new string[] { error, ex.ToString() } : new string[] { error };
             File.AppendAllLines(errorLogFilename, appendLines);
+        }
+
+        internal void LogWarning(string warning) {
+            if(EnableDebugLogging) {
+                Debug.LogWarning("[Xasu] " + warning);
+            }
+        }
+
+        internal void Log(string message) {
+            if(EnableDebugLogging) {
+                Debug.Log("[Xasu] " + message);
+            }
+        }
+
+        internal void UnityEngineLog(string message) {
+            if(EnableDebugLogging) {
+                UnityEngine.Debug.Log("[Xasu] " + message);
+            }
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Xasu.HighLevel
                 }
                 else
                 {
-                    Debug.LogWarning("[STRICT=OFF] Error adding extensions to trace. Ignoring...");
+                    XasuTracker.Instance.LogWarning("[STRICT=OFF] Error adding extensions to trace. Ignoring...");
                     Debug.LogException(ex);
                 }
                 return traceExtensions;

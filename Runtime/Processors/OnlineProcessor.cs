@@ -181,7 +181,7 @@ namespace Xasu.Processors
                     }
                     catch (BrokenCircuitException)
                     {
-                        Debug.LogWarning("The tracker tried to send traces while the circuit was open, generating an exception. Resetting the circuit...");
+                        XasuTracker.Instance.LogWarning("The tracker tried to send traces while the circuit was open, generating an exception. Resetting the circuit...");
                         networkCircuitBreaker.Reset();
                         apiCircuitBreaker.Reset();
                     }
@@ -295,7 +295,7 @@ namespace Xasu.Processors
             foreach(var trace in lastTraceTasks)
             {
                 TracesCompleted++;
-                Debug.Log(string.Format("[TRACKER ({0}): {1}] Done with statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), trace.statement.id));
+                XasuTracker.Instance.Log(string.Format("[TRACKER ({0}): {1}] Done with statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), trace.statement.id));
                 trace.completionSource.SetResult(trace.statement);
                 localQueue.PopFront();
             }
@@ -350,7 +350,7 @@ namespace Xasu.Processors
                 for (int i = 0; i < lastStatements.Count; i++)
                 {
                     TracesFromFallbackSent++;
-                    Debug.Log(string.Format("[TRACKER ({0}): {1}] Done submitting fallback statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), lastStatements[i].id));
+                    XasuTracker.Instance.Log(string.Format("[TRACKER ({0}): {1}] Done submitting fallback statement. {2} ", Thread.CurrentThread.ManagedThreadId, this.GetType(), lastStatements[i].id));
                     oldFallback.ReadLine();
                 }
 

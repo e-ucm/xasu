@@ -98,12 +98,12 @@ namespace Xasu.Requests
             }
             catch (APIException ex)
             {
-                Debug.Log(string.Format("[REQUESTS ({0})] I've seen API exceptions here... ", Thread.CurrentThread.ManagedThreadId));
+                XasuTracker.Instance.Log(string.Format("[REQUESTS ({0})] I've seen API exceptions here... ", Thread.CurrentThread.ManagedThreadId));
                 result = ex.Response;
             }
             catch (NetworkException)
             {
-                Debug.Log(string.Format("[REQUESTS ({0})] I've seen network exceptions here... ", Thread.CurrentThread.ManagedThreadId));
+                XasuTracker.Instance.Log(string.Format("[REQUESTS ({0})] I've seen network exceptions here... ", Thread.CurrentThread.ManagedThreadId));
                 throw;
             }
 
@@ -136,7 +136,7 @@ namespace Xasu.Requests
                 Application.runInBackground = true;
             }
 
-            Debug.Log(string.Format("[REQUESTS ({2})] {1} Requesting \"{0}\"", webRequest.url, webRequest.method, Thread.CurrentThread.ManagedThreadId));
+            XasuTracker.Instance.Log(string.Format("[REQUESTS ({2})] {1} Requesting \"{0}\"", webRequest.url, webRequest.method, Thread.CurrentThread.ManagedThreadId));
             asyncRequest = webRequest.SendWebRequest();
 
             if (inBackground)
@@ -161,13 +161,26 @@ namespace Xasu.Requests
             }
 
             // Sometimes the webrequest is finished but the download is not
-            while (!(webRequest.result == UnityWebRequest.Result.ConnectionError) && !(webRequest.result == UnityWebRequest.Result.ProtocolError) && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1)
+            bool webRequestResult=false;
+            while (webRequestResult)
             {
                 await Task.Yield();
+                #if UNITY_2022_2_OR_NEWER
+                    webRequestResult=(!(webRequest.result == UnityWebRequest.Result.ConnectionError) && !(webRequest.result == UnityWebRequest.Result.ProtocolError) && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1);
+                #else
+                    webRequestResult=(!webRequest.isNetworkError && !webRequest.isHttpError && !webRequest.downloadHandler.isDone && webRequest.downloadProgress != 0 && webRequest.downloadProgress != 1);
+                #endif
             }
 
             // Network Error Exception
-            if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            bool networkWebRequestError=false;
+            #if UNITY_2022_2_OR_NEWER
+                networkWebRequestError=(webRequest.result == UnityWebRequest.Result.ConnectionError);
+            #else
+                // Use the old API
+                networkWebRequestError=(webRequest.isNetworkError);
+            #endif
+            if(networkWebRequestError)
             {
                 NetworkInfo.Failed();
                 throw new NetworkException(webRequest.error);
@@ -175,7 +188,15 @@ namespace Xasu.Requests
             NetworkInfo.Worked();
 
             // API / Http Exception
-            if (webRequest.result == UnityWebRequest.Result.ProtocolError)
+            // Network Error Exception
+            bool httpWebRequestError=false;
+            #if UNITY_2022_2_OR_NEWER
+                httpWebRequestError=(webRequest.result == UnityWebRequest.Result.ProtocolError);
+            #else
+                // Use the old API
+                httpWebRequestError=(webRequest.isHttpError);
+            #endif
+            if(httpWebRequestError)
             {
                 var httpResponse = new MyHttpResponse()
                 {
@@ -194,7 +215,7 @@ namespace Xasu.Requests
                 throw new BackgroundException(backgroundError);
             }
 
-            Debug.Log(string.Format("[REQUESTS ({4})] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
+            XasuTracker.Instance.Log(string.Format("[REQUESTS ({4})] {1} Request to \"{0}\" succedded ({2}): \"{3}\"",
                 webRequest.url, webRequest.method, webRequest.responseCode, webRequest.downloadHandler.text, Thread.CurrentThread.ManagedThreadId));
 
             return webRequest;

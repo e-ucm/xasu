@@ -60,7 +60,10 @@ namespace Xasu.Util
 
         public static void CompleteAllStatements()
         {
-            _partialStatements.Clear();
+            if (_partialStatements != null)
+            {
+                _partialStatements.Clear();
+            }
         }
 
         public static IEnumerable<Statement> Completed(this IEnumerable<Statement> statements)

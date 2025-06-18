@@ -32,6 +32,7 @@ namespace Xasu.Auth.Protocols
         private readonly string requestTokenEndpointField = "request_token_endpoint"; // AKA "initiate" endpoint
         private readonly string authorizeEndpointField = "authorize_endpoint";
         private readonly string accessTokenEndpointField = "access_token_endpoint";
+        private readonly string homePageField = "homepage";
 
         // Bearer
         private string consumerKey;
@@ -92,11 +93,15 @@ namespace Xasu.Auth.Protocols
                 var authorizeResponse = await DoAuthorizeRequest(authorizeEndpoint, temporaryToken, oauthListener);
                 var doAccessTokenRequest = await DoAccessTokenRequest(accessTokenEndpoint, consumerKey, authorizeResponse);
 
+                var homePage = authorizeEndpoint.Replace((new Uri(authorizeEndpoint)).AbsolutePath, "");
+                if (config.ContainsKey(homePageField)) {
+                    homePage = config.Value(homePageField);
+                }
                 Agent = new Agent
                 {
                     name = "OAuth with token " + doAccessTokenRequest.OAuthToken,
                     account = new AgentAccount {
-                        homePage = authorizeEndpoint,
+                        homePage = homePage,
                         name = "OAuth with token " + doAccessTokenRequest.OAuthToken
                     }
                 };

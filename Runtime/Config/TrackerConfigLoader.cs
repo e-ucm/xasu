@@ -18,7 +18,7 @@ namespace Xasu.Config
 
         public static async Task<TrackerConfig> LoadAsync(string fileName)
         {
-            Debug.Log("[TRACKER CONFIG] Loading...");
+            XasuTracker.Instance.Log("[TRACKER CONFIG] Loading...");
             string contents = await ReadFileFromStreamingAssets(fileName);
             return ParseContents(contents);
         }
@@ -27,7 +27,7 @@ namespace Xasu.Config
         {
             if (!string.IsNullOrEmpty(contents))
             {
-                Debug.Log("[TRACKER CONFIG] tracker_config.json content: " + contents);
+                XasuTracker.Instance.Log("[TRACKER CONFIG] tracker_config.json content: " + contents);
                 return JsonConvert.DeserializeObject<TrackerConfig>(contents);
             }
             return null;
@@ -60,13 +60,13 @@ namespace Xasu.Config
 
             if (reader != null)
             {
-                Debug.Log("[TRACKER CONFIG] Requesting tracker_config.json from url: " + reader.uri);
+                XasuTracker.Instance.Log("[TRACKER CONFIG] Requesting tracker_config.json from url: " + reader.uri);
                 await UnityRequestHandler.DoRequest(reader);
                 contents = reader.downloadHandler.text;
             }
             else
             {
-                Debug.Log("[TRACKER CONFIG] Loading tracker_config.json from file: " + filePath);
+                XasuTracker.Instance.Log("[TRACKER CONFIG] Loading tracker_config.json from file: " + filePath);
 #if !UNITY_WEBGL || UNITY_EDITOR
                 if (!System.IO.File.Exists(filePath))
                 {

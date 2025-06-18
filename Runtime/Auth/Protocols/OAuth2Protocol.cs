@@ -35,8 +35,10 @@ namespace Xasu.Auth.Protocols
         private const string clientIdField = "client_id";
         private const string scopeField = "scope";
         private const string stateField = "state";
+        private const string loginHintField = "login_hint";
+        private const string tokenValueField = "simva_user_token";
         private const string codeChallengeMethodField = "code_challenge_method";
-
+        private readonly string homePageField = "homepage";
         private string authEndpoint;
         private string tokenEndpoint;
         private string grantType;
@@ -44,6 +46,8 @@ namespace Xasu.Auth.Protocols
         private string password;
         private string clientId;
         private string scope;
+        private string tokenValue;
+        private string login_hint;
         private string state;
         private PKCETypes codeChallengeMethod;
         private OAuth2Token token;
@@ -76,7 +80,7 @@ namespace Xasu.Auth.Protocols
         {
             initConfig = config;
 
-            Debug.Log("[OAuth2] Starting");
+            XasuTracker.Instance.Log("[OAuth2] Starting");
             // Main params
             tokenEndpoint = config.GetRequiredValue(tokenEndpointField, fieldMissingMessage);
             grantType = config.GetRequiredValue(grantTypeField, fieldMissingMessage).ToLower();
@@ -99,6 +103,13 @@ namespace Xasu.Auth.Protocols
             // Optional parameters
             scope = config.Value(scopeField);
             state = config.Value(stateField);
+            tokenValue = config.Value(tokenValueField);
+            login_hint = config.Value(loginHintField);
+
+            var homePage = tokenEndpoint.Replace((new Uri(tokenEndpoint)).AbsolutePath, "");
+            if (config.ContainsKey(homePageField)) {
+                homePage = config.Value(homePageField);
+            }
 
             // Grant type specific params
             switch (grantType)
@@ -111,7 +122,7 @@ namespace Xasu.Auth.Protocols
                 case "code":
                     // TODO: support client secret
                     authEndpoint = config.GetRequiredValue(authEndpointField, fieldMissingMessage);
-                    token = await DoAccessCodeFlow(authEndpoint, tokenEndpoint, clientId, codeChallengeMethod, scope, state);
+                    token = await DoAccessCodeFlow(authEndpoint, tokenEndpoint, clientId, codeChallengeMethod, scope, state, tokenValue, login_hint);
                     break;
 
                 // TODO: Implement Client flow
@@ -120,7 +131,7 @@ namespace Xasu.Auth.Protocols
                     // We need the username and password fields
                     username = config.GetRequiredValue(usernameField, fieldMissingMessage);
                     password = config.GetRequiredValue(passwordField, fieldMissingMessage);
-                    token = await DoResourceOwnedPasswordCredentialsFlow(tokenEndpoint, clientId, username, password, scope, state);
+                    token = await DoResourceOwnedPasswordCredentialsFlow(tokenEndpoint, clientId, username, password, scope, state, login_hint);
                     break;
                 default:
                     throw new NotSupportedException(string.Format(unsupportedGrantTypeMessage, grantType));
@@ -128,12 +139,12 @@ namespace Xasu.Auth.Protocols
 
             if(token != null)
             {
-                Debug.Log("[OAuth2] Token obtained: " + token.AccessToken);
+                XasuTracker.Instance.Log("[OAuth2] Token obtained: " + token.AccessToken);
                 Agent = new Agent
                 {
                     name = token.Username,
                     account = new AgentAccount {
-                        homePage = authEndpoint,
+                        homePage = homePage,
                         name = token.Username
                     }
                 };
@@ -167,7 +178,7 @@ namespace Xasu.Auth.Protocols
         }
 
         private async Task<OAuth2Token> DoAccessCodeFlow(string authUrl, string tokenUrl, string clientId, PKCETypes pkceType,
-            string scope, string state)
+            string scope, string state, string tokenValue, string login_hint)
         {
             // Generate PKCE
             string codeVerifier = null, codeChallenge = null;
@@ -183,7 +194,7 @@ namespace Xasu.Auth.Protocols
             var redirectUrl = AuthUtility.ListenForCallback(port, listener, cancellationToken);
 
             // Do Authorize Request (In WebGL this is a redirect)
-            var authCode = await DoAuthorizeRequest(authUrl, clientId, scope, state, redirectUrl, listener, pkceType, codeChallenge);
+            var authCode = await DoAuthorizeRequest(authUrl, clientId, scope, state, tokenValue, login_hint, redirectUrl, listener, pkceType, codeChallenge);
             
             var form = new Dictionary<string, string>()
             {
@@ -201,7 +212,7 @@ namespace Xasu.Auth.Protocols
         }
 
         private async Task<OAuth2Token> DoResourceOwnedPasswordCredentialsFlow(string tokenUrl, string clientId, string username, string password, 
-            string scope, string state)
+            string scope, string state, string login_hint)
         {
             var form = new Dictionary<string, string>()
                 {
@@ -219,11 +230,16 @@ namespace Xasu.Auth.Protocols
                 form.Add("state", state);
             }
 
+            if (!string.IsNullOrEmpty(login_hint))
+            {
+                form.Add("login_hint", login_hint);
+            }
+
             return await DoTokenRequest(tokenUrl, clientId, "password", form);
         }
 
 
-        private async Task<OAuth2AuthorizationCode> DoAuthorizeRequest(string authorizeEndpoint, string clientId, string scope, string state, string redirectUrl, OAuth2Listener listener, PKCETypes pkceType, string codeChallenge = null)
+        private async Task<OAuth2AuthorizationCode> DoAuthorizeRequest(string authorizeEndpoint, string clientId, string scope, string state, string tokenValue, string login_hint, string redirectUrl, OAuth2Listener listener, PKCETypes pkceType, string codeChallenge = null)
         {
             var parameters = new Dictionary<string, string>()
             {
@@ -245,6 +261,16 @@ namespace Xasu.Auth.Protocols
             if (!string.IsNullOrEmpty(state))
             {
                 parameters.Add("state", state);
+            }
+
+            if (!string.IsNullOrEmpty(login_hint))
+            {
+                parameters.Add("login_hint", login_hint);
+            }
+
+            if (!string.IsNullOrEmpty(tokenValue))
+            {
+                parameters.Add(tokenValueField, tokenValue);
             }
 
             OAuth2AuthorizationCode authorizeResponse = null;
