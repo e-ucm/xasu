@@ -24,6 +24,7 @@ namespace Xasu.Auth.Protocols
         private string realm;
 
         public IAsyncPolicy Policy { get; set; }
+        public IHttpRequestHandler RequestHandler { get; set; }
 
         public Agent Agent { get; private set; }
 

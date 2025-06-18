@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 using Xasu.Auth.Utils;
 using System.Threading;
 using Xasu.Util;
@@ -12,6 +11,7 @@ using Xasu.Auth.Protocols.OAuth;
 using Xasu.Requests;
 using TinCan;
 using Xasu.Exceptions;
+using System.Text;
 
 namespace Xasu.Auth.Protocols
 {
@@ -43,6 +43,8 @@ namespace Xasu.Auth.Protocols
         private OAuthAuthorization token;
 
         public IAsyncPolicy Policy { get; set; }
+
+        public IHttpRequestHandler RequestHandler { get; set; }
 
         public Agent Agent { get; private set; }
 
@@ -111,9 +113,11 @@ namespace Xasu.Auth.Protocols
             }
         }
 
-        private static async Task<TemporaryAuthorization> DoTokenRequest(string requestTokenEndpoint, string consumerKey, string callbackUrl)
+        private async Task<TemporaryAuthorization> DoTokenRequest(string requestTokenEndpoint, string consumerKey, string callbackUrl)
         {
-            UnityWebRequest uwr = UnityWebRequest.Post(requestTokenEndpoint, new Dictionary<string, string>()
+            var request = new MyHttpRequest { url = requestTokenEndpoint, method = "POST" };
+            request.policy = Policy;
+            request.form = new Dictionary<string, string>()
             {
                 { "oauth_consumer_key", consumerKey },
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -121,14 +125,15 @@ namespace Xasu.Auth.Protocols
 #else
                 { "oauth_callback", callbackUrl } // We listen for the code
 #endif
-            });
+            };
 
-            return await RequestsUtility.DoRequest<TemporaryAuthorization>(uwr);
+            var response = await RequestHandler.SendRequest(request);
+            return DeserializeFromResponse<TemporaryAuthorization>(response);
         }
 
-        private static async Task<AuthorizeResponse> DoAuthorizeRequest(string authorizeEndpoint, TemporaryAuthorization tempAuth, OAuthListener listener)
+        private async Task<AuthorizeResponse> DoAuthorizeRequest(string authorizeEndpoint, TemporaryAuthorization tempAuth, OAuthListener listener)
         {
-            var url = RequestsUtility.AppendParamsToExistingQueryString(authorizeEndpoint, new Dictionary<string, string>()
+            var url = RequestHandler.AppendParamsToExistingQueryString(authorizeEndpoint, new Dictionary<string, string>()
             {
                 { "oauth_token", tempAuth.OAuthToken }
             });
@@ -153,16 +158,24 @@ namespace Xasu.Auth.Protocols
 #endif
         }
 
-        private static async Task<OAuthAuthorization> DoAccessTokenRequest(string accessTokenEndpoint, string consumerKey, AuthorizeResponse authorizeResponse)
+        private async Task<OAuthAuthorization> DoAccessTokenRequest(string accessTokenEndpoint, string consumerKey, AuthorizeResponse authorizeResponse)
         {
-            UnityWebRequest uwr = UnityWebRequest.Post(accessTokenEndpoint, new Dictionary<string, string>()
+            var request = new MyHttpRequest { url = accessTokenEndpoint, method = "POST" };
+            request.policy = Policy;
+            request.form = new Dictionary<string, string>()
             {
                 { "oauth_consumer_key", consumerKey },
                 { "oauth_token", authorizeResponse.OAuthToken },
                 { "oauth_verifier", authorizeResponse.OAuthVerifier }
-            });
+            };
 
-            return await RequestsUtility.DoRequest<OAuthAuthorization>(uwr);
+            var response = await RequestHandler.SendRequest(request);
+            return DeserializeFromResponse<OAuthAuthorization>(response);
+        }
+
+        private static T DeserializeFromResponse<T>(MyHttpResponse response)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(response.content));
         }
 
         public Task UpdateParamsForAuth(MyHttpRequest request)
