@@ -1,7 +1,10 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Networking;
 using Xasu.Util;
+
+#if UNITY_WEBGL
+using UnityEngine.Networking;
+#endif
 
 namespace Xasu.CMI5
 {
@@ -10,11 +13,13 @@ namespace Xasu.CMI5
 
         public static string GetParam(string name)
         {
+#if UNITY_WEBGL
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
                 return UnityWebRequest.UnEscapeURL(WebGLUtility.GetParameter(name));
             }
-            else if(Application.platform == RuntimePlatform.WindowsPlayer)
+#endif
+            if(Application.platform == RuntimePlatform.WindowsPlayer)
             {
                 var cliArgs = Environment.GetCommandLineArgs();
                 var cmi5ParamIndex = Array.IndexOf(cliArgs, "-cmi5");

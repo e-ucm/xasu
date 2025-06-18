@@ -14,6 +14,9 @@ namespace Xasu.Requests
         public Dictionary<String, String> headers { get; set; } = new Dictionary<String, String>();
         public String contentType { get; set; }
         public byte[] content { get; set; }
+
+        public Dictionary<String, String> form { get; set; }
+        public string text { get; set; }
         public IAuthProtocol authorization { get; set; }
         public IAsyncPolicy policy { get; set; }
     }

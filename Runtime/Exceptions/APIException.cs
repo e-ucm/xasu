@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEngine.Networking;
+using Xasu.Requests;
 
 namespace Xasu.Exceptions
 {
@@ -7,18 +7,20 @@ namespace Xasu.Exceptions
     public class APIException : Exception
     {
         public int HttpCode { get; private set; }
-        public UnityWebRequest Request { get; private set; }
+        public MyHttpResponse Response { get; private set; }
 
-        public APIException(int httpCode, string message, UnityWebRequest request) : base(message)
+        public APIException(int httpCode, string message, MyHttpResponse response) : base(message)
         {
             this.HttpCode = httpCode;
-            this.Request = request;
+            this.Response = response;
+            this.Response.ex = this;
         }
 
-        public APIException(int httpCode, string message, UnityWebRequest request, Exception innerException) : base(message, innerException)
+        public APIException(int httpCode, string message, MyHttpResponse response, Exception innerException) : base(message, innerException)
         {
             this.HttpCode = httpCode;
-            this.Request = request;
+            this.Response = response;
+            this.Response.ex = this;
         }
     }
 }

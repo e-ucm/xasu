@@ -2,17 +2,30 @@
 using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
-using UnityEngine.Networking;
 using Xasu.Requests;
 using System.IO.Compression;
 
 public class PackageDownloader
 {
+    private readonly IHttpRequestHandler requestHandler;
+
+    public PackageDownloader(IHttpRequestHandler requestHandler)
+    {
+        this.requestHandler = requestHandler;
+    }
+
+#if UNITY_5_3_OR_NEWER
+
+    private PackageDownloader()
+    {
+        this.requestHandler = new UnityRequestHandler();
+    }
+
 
     private static PackageDownloader instance;
     public static PackageDownloader Instance { get { return instance ?? (instance = new PackageDownloader()); } }
 
-    private PackageDownloader() { }
+#endif
 
     public async Task<bool> DownloadPackage(string name, string folderName, string url)
     {
@@ -37,7 +50,8 @@ public class PackageDownloader
 
         try
         {
-            var request = await RequestsUtility.DoRequest(UnityWebRequest.Get(url), progress);
+            var request = new MyHttpRequest() { url = url, method = "GET" };
+            var response = await requestHandler.SendRequest(request);
 
             var downloadFileName = name.Replace(" ", "").Trim() + ".zip";
 
@@ -48,7 +62,7 @@ public class PackageDownloader
 
             // Write the zip file
             EditorUtility.DisplayProgressBar("Copying", "Copying downloaded file " + name + "...", 100);
-            File.WriteAllBytes(downloadPath + "/" + downloadFileName, request.downloadHandler.data);
+            File.WriteAllBytes(downloadPath + "/" + downloadFileName, response.content);
             // Unzip it
             EditorUtility.DisplayProgressBar("Extracting...", "Extracting " + name + " to " + downloadPath, 0f);
             DecompressFile(downloadPath + "/" + downloadFileName, downloadPath);

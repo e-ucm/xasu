@@ -31,6 +31,7 @@ namespace Xasu.Processors
         private readonly IAuthProtocol authProtocol;
         private readonly string failedTracesFile;
         private readonly string fallbackTmpFile;
+        private readonly IHttpRequestHandler requestHandler;
 
         private int currentBatchSize;
         protected IAsyncLRS lrs;
@@ -41,12 +42,12 @@ namespace Xasu.Processors
 
         public override int TracesPending { get { return base.TracesPending + TracesToFallback - (TracesFromFallbackSent + TracesFromFallbackFailed); } }
 
-        public OnlineProcessor(Uri lrsEndpoint, TCAPIVersion version, int batchSize, IAuthProtocol authProtocol,
-            bool fallback) : this(lrsEndpoint.ToString(), version, batchSize, authProtocol, fallback)
+        public OnlineProcessor(Uri lrsEndpoint, TCAPIVersion version, int batchSize, IAuthProtocol authProtocol, IHttpRequestHandler requestHandler,
+            bool fallback) : this(lrsEndpoint.ToString(), version, batchSize, authProtocol, requestHandler, fallback)
         {
         }
 
-        public OnlineProcessor(string lrsEndpoint, TCAPIVersion version, int batchSize, IAuthProtocol authProtocol, 
+        public OnlineProcessor(string lrsEndpoint, TCAPIVersion version, int batchSize, IAuthProtocol authProtocol, IHttpRequestHandler requestHandler,
             bool fallback) : base("fallback.log", Config.TraceFormats.XAPI, version, true)
         {
             failedTracesFile = Application.persistentDataPath + "/failed_traces.log";
@@ -57,6 +58,7 @@ namespace Xasu.Processors
             this.fallback = fallback;
             this.batchSize = currentBatchSize = batchSize;
             this.authProtocol = authProtocol;
+            this.requestHandler = requestHandler;
         }
 
         public override async Task Init()
@@ -67,7 +69,8 @@ namespace Xasu.Processors
             this.lrs = new UnityLRS(lrsEndpoint)
             {
                 auth = authProtocol,
-                policy = ConfigureLRSPolicy()
+                policy = ConfigureLRSPolicy(),
+                requestHandler = requestHandler
             };
             await base.Init();
 
