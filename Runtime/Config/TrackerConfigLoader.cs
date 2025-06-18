@@ -61,7 +61,7 @@ namespace Xasu.Config
             if (reader != null)
             {
                 Debug.Log("[TRACKER CONFIG] Requesting tracker_config.json from url: " + reader.uri);
-                await RequestsUtility.DoRequest(reader);
+                await UnityRequestHandler.DoRequest(reader);
                 contents = reader.downloadHandler.text;
             }
             else
