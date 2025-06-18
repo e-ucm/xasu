@@ -11,6 +11,7 @@ using UnityEngine;
 using Xasu.Auth.Protocols;
 using Xasu.CMI5;
 using Xasu.Exceptions;
+using Xasu.Requests;
 using Xasu.Util;
 
 namespace Xasu.Processors
@@ -28,8 +29,8 @@ namespace Xasu.Processors
         public JObject StateDocumentData { get; private set; }
         public AgentProfileDocument AgentProfileDocument { get; private set; }
 
-        public Cmi5Processor(int batchSize, IAuthProtocol authProtocol, bool fallback)
-            : base(Cmi5Helper.Endpoint, TCAPIVersion.V103, batchSize, authProtocol, fallback)
+        public Cmi5Processor(int batchSize, IAuthProtocol authProtocol, IHttpRequestHandler requestHandler, bool fallback)
+            : base(Cmi5Helper.Endpoint, TCAPIVersion.V103, batchSize, authProtocol, requestHandler, fallback)
         {
         }
 
