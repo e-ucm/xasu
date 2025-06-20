@@ -63,7 +63,6 @@ namespace Xasu.Auth.Protocols
             State = AuthState.Working;
             Agent = new Agent
             {
-                name = username,
                 account = new AgentAccount {
                     homePage = homePage,
                     name = username
