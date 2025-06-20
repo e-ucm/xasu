@@ -66,10 +66,18 @@ namespace Xasu
 
         public async Task InitOffline(string username=null, string email=null)
         {
-            this.username = username;
-            this.email = email;
+            TrackerConfig trackerConfig = await TrackerConfigLoader.LoadLocalAsync();
+            if (trackerConfig.Offline)
+            {
+                this.username = username;
+                this.email = email;
+            }
+            else
+            {
+                LogWarning("[TRACKER] Don't use InitOffline() function when using only Online or/and Backup when not AutoStart. Prefer using Init() function.");
+            }
             // Init with local file config
-            await Init(await TrackerConfigLoader.LoadLocalAsync());
+            await Init(trackerConfig);
         }
 
         public async Task Init()
@@ -96,6 +104,15 @@ namespace Xasu
                 IProcessor onlineProcessor = null, localProcessor = null, backupProcessor = null;
 
                 // TODO: Implement a ProcessorFactory that performs generic initialization
+                if (TrackerConfig.Offline)
+                {
+                    Log("[TRACKER] Initializing local processor...");
+                    localProcessor = new LocalProcessor(TrackerConfig.FileName, TrackerConfig.TraceFormat);
+
+                    await localProcessor.Init();
+                    processors.Add(localProcessor);
+                }
+
                 if (TrackerConfig.Online)
                 {
                     if (!TrackerConfig.AuthParameters.ContainsKey("lrs_endpoint"))
@@ -128,26 +145,17 @@ namespace Xasu
                     await onlineProcessor.Init();
                     processors.Add(onlineProcessor);
                 }
-
-                if (TrackerConfig.Offline)
-                {
-                    Log("[TRACKER] Initializing local processor...");
-                    localProcessor = new LocalProcessor(TrackerConfig.FileName, TrackerConfig.TraceFormat);
-
-                    await localProcessor.Init();
-                    processors.Add(localProcessor);
-                }
-
+                
                 if (TrackerConfig.Backup)
                 {
-                    if(backupAuthorization != null)
+                    if (backupAuthorization != null)
                     {
                         backupAuthProtocol = backupAuthorization;
                     }
                     else if (!string.IsNullOrEmpty(TrackerConfig.BackupAuthProtocol))
                     {
-                        backupAuthProtocol = TrackerConfig.BackupAuthProtocol == "same" 
-                            ? onlineAuthProtocol 
+                        backupAuthProtocol = TrackerConfig.BackupAuthProtocol == "same"
+                            ? onlineAuthProtocol
                             : await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null);
                     }
 
@@ -158,7 +166,7 @@ namespace Xasu
                     }
 
                     Log("[TRACKER] Initializing backup processor...");
-                    backupProcessor = new BackupProcessor(TrackerConfig.BackupFileName, TrackerConfig.BackupTraceFormat, 
+                    backupProcessor = new BackupProcessor(TrackerConfig.BackupFileName, TrackerConfig.BackupTraceFormat,
                         TrackerConfig.BackupEndpoint, TrackerConfig.BackupRequestConfig, backupAuthProtocol, null); // TODO: Backup policy
 
                     await backupProcessor.Init();
