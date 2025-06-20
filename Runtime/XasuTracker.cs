@@ -35,6 +35,8 @@ namespace Xasu
         public IAsyncLRS LRS { get; set; }
         public TrackerConfig TrackerConfig { get; private set; }
         public Agent DefaultActor { get; set; }
+        private string username = null;
+        private string email = null;
         public Context DefaultContext { get; set; }
         public string DefaultIdPrefix { get; set; }
 
@@ -60,6 +62,14 @@ namespace Xasu
                 trackerStatus.Update();
                 return trackerStatus;
             } 
+        }
+
+        public async Task InitOffline(string username=null, string email=null)
+        {
+            this.username = username;
+            this.email = email;
+            // Init with local file config
+            await Init(await TrackerConfigLoader.LoadLocalAsync());
         }
 
         public async Task Init()
@@ -156,7 +166,7 @@ namespace Xasu
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
-                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
+                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
                 
                 Activity sg = new Activity  { id = "https://w3id.org/xapi/seriousgames" };
                 List<Activity> list = new List<Activity>();
