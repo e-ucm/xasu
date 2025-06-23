@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using TinCan;
+using UnityEngine;
 
 namespace Xasu.HighLevel
 {
@@ -15,7 +16,27 @@ namespace Xasu.HighLevel
         protected abstract Dictionary<Enum, string> VerbIds { get; }
         protected abstract Dictionary<Enum, string> TypeIds { get; }
         protected abstract Dictionary<Enum, string> ExtensionIds { get; }
+        protected abstract Dictionary<Enum, string> ContextActivityIds { get; }
 
+        protected Context GetContext(Enum context)
+        {
+            XasuTracker.Instance.LogWarning(ContextActivityIds[context]);
+            /*
+            Activity act = ;
+            */
+            List<Activity> list = new List<Activity>();
+            list.Add(new Activity {
+                id = ContextActivityIds[context],
+                definition = new ActivityDefinition {
+                    type = new Uri("http://adlnet.gov/expapi/activities/profile"),
+                }
+            });
+            return new Context {
+                contextActivities =new ContextActivities
+                {
+                    category = list
+                } };
+        }
 
         protected Verb GetVerb(Enum verb)
         {

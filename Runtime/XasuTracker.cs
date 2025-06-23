@@ -37,7 +37,7 @@ namespace Xasu
         public Agent DefaultActor { get; set; }
         private string username = null;
         private string email = null;
-        public Context DefaultContext { get; set; }
+        public Guid DefaultContextRegistrationId { get; set; }
         public string DefaultIdPrefix { get; set; }
 
         protected override void Awake()
@@ -176,11 +176,8 @@ namespace Xasu
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
                 
-                Activity sg = new Activity  { id = "https://w3id.org/xapi/seriousgames" };
-                List<Activity> list = new List<Activity>();
-                list.Add(sg);
-                DefaultContext = new Context { registration = Guid.NewGuid(),contextActivities=new ContextActivities{ category = list } };
-                
+                DefaultContextRegistrationId = Guid.NewGuid();
+                LogWarning("[TRACKER] " + DefaultContextRegistrationId);
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
@@ -409,9 +406,9 @@ namespace Xasu
                 statement.timestamp = DateTime.UtcNow;
             }
 
-            if (statement.context == null)
+            if (statement.context.registration == null)
             {
-                statement.context = DefaultContext;
+                statement.context.registration = DefaultContextRegistrationId;
             }
         }
 
