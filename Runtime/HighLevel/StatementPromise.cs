@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TinCan;
@@ -26,21 +27,101 @@ namespace Xasu.HighLevel
             return this;
         }
 
-        public StatementPromise WithScore(double score)
+        public StatementPromise WithScore(Dictionary<string, double> scores)
         {
-            Statement.result.score = new Score
+            if (Statement.result.score == null)
             {
-                scaled = score
-            };
+                Statement.result.score = new Score();
+            }
+            if (scores.ContainsKey("raw")) {
+                Statement.result.score.raw = scores["raw"];
+            }
+            if (scores.ContainsKey("min")) {
+                Statement.result.score.min = scores["min"];
+            }
+            if (scores.ContainsKey("max")) {
+                Statement.result.score.max = scores["max"];
+            }
+            if (scores.ContainsKey("scaled")) {
+                Statement.result.score.scaled = scores["scaled"];
+            }
             return this;
         }
 
+        public StatementPromise WithScoreRaw(double score)
+        {
+            if (Statement.result.score == null)
+            {
+                Statement.result.score = new Score();
+            }
+            Statement.result.score.raw = score;
+            return this;
+        }
+
+        public StatementPromise WithScoreMin(double score)
+        {
+            if (Statement.result.score == null)
+            {
+                Statement.result.score = new Score();
+            }
+            Statement.result.score.min = score;
+            return this;
+        }
+
+        public StatementPromise WithScoreMax(double score)
+        {
+            if (Statement.result.score == null)
+            {
+                Statement.result.score = new Score();
+            }
+            Statement.result.score.max = score;
+            return this;
+        }
+
+        public StatementPromise WithScoreScaled(double score)
+        {
+            if (Statement.result.score == null)
+            {
+                Statement.result.score = new Score();
+            }
+            Statement.result.score.scaled = score;
+            return this;
+        }
+
+        public StatementPromise WithCompletion(bool completion)
+        {
+            Statement.result.completion = completion;
+            return this;
+        }
+
+        public StatementPromise WithDuration(DateTime init, DateTime end)
+        {
+            TimeSpan duration = end - init;
+            Statement.result.duration = duration;
+            return this;
+        }
+
+        public StatementPromise WithResponse(string response)
+        {
+            Statement.result.response = response;
+            return this;
+        }
+
+        public StatementPromise WithResultExtension(string key, object value)
+        {
+            Dictionary<string, object> extensions = new Dictionary<string, object>();
+            extensions.Add(key, value);
+            Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
+            return this;
+        }
 
         public StatementPromise WithResultExtensions(Dictionary<string, object> extensions)
         {
             Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
             return this;
         }
+
+        
         public StatementPromise WithContextExtensions(Dictionary<string, object> extensions)
         {
             Statement.context.extensions = AddExtensions(Statement.result.extensions, extensions);
