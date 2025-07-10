@@ -21,6 +21,30 @@ namespace Xasu.HighLevel
             this.Promise = task;
         }
 
+        public StatementPromise addContextActivityParent(string id, string name, string description, string type) {
+            Activity act = new Activity {
+                id = id,
+                definition = new ActivityDefinition {
+                    //name = new LanguageMap {
+			    	//    "en-US"= name,
+			        //},
+                    //description= new LanguageMap  {
+			        //	"en-US"=description,
+			        //},
+                    type = new Uri(type),
+                }
+            };
+            return this.addContextParentActivity(act);
+        }
+
+        public StatementPromise addContextParentActivity(Activity parentContextActivity) {
+            if(Statement.context.contextActivities.grouping == null) {
+                Statement.context.contextActivities.grouping = new List<Activity>();
+            }
+            Statement.context.contextActivities.grouping.Add(parentContextActivity);
+            return this;
+        }
+
         public StatementPromise WithSuccess(bool success)
         {
             Statement.result.success = success;

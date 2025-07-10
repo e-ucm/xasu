@@ -78,6 +78,7 @@ namespace Xasu.HighLevel
             };
         protected override Dictionary<Enum, string> ExtensionIds => objectIds;
 
+        protected override Dictionary<Enum, string> ContextActivityIds => null;
 
         /**********************
             * Static attributes

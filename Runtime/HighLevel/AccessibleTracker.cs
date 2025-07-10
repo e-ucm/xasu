@@ -56,6 +56,17 @@ namespace Xasu.HighLevel
 
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
+        protected enum ContextActivity
+        {
+            SeriousGames
+        }
+
+        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
+        {
+            { ContextActivity.SeriousGames, "https://w3id.org/xapi/seriousgames" },
+        };
+
+        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
 
         /// <summary>
         /// Player accessed a reachable.
@@ -77,7 +88,8 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Accessed),
-                target = GetTargetActivity(reachableId, type)
+                target = GetTargetActivity(reachableId, type),
+                context= GetContext(ContextActivity.SeriousGames)
             });
         }
 
@@ -101,7 +113,8 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Skipped),
-                target = GetTargetActivity(reachableId, type)
+                target = GetTargetActivity(reachableId, type),
+                context= GetContext(ContextActivity.SeriousGames)
             });
         }
 

@@ -66,9 +66,6 @@ namespace Xasu.Processors
             AgentProfileDocument = agentResponse.content;
             if (!CircuitsClosed()) apiCircuitBreaker.Reset();
 
-            // Setup the context
-            XasuTracker.Instance.DefaultContext = Cmi5Helper.Cmi5Allowed;
-
             State = ProcessorState.Working;
             // Send initialized statement
             var initializedResponse = await SendInitializedAUStatement();

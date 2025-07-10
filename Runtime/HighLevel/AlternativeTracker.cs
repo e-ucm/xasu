@@ -52,6 +52,17 @@ namespace Xasu.HighLevel
         * *******************/
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
+        protected enum ContextActivity
+        {
+            SeriousGames
+        }
+
+        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
+        {
+            { ContextActivity.SeriousGames, "https://w3id.org/xapi/seriousgames" },
+        };
+
+        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
 
         /**********************
         *     Templates
@@ -83,7 +94,8 @@ namespace Xasu.HighLevel
                 result = new Result
                 {
                     response = optionId
-                }
+                },
+                context= GetContext(ContextActivity.SeriousGames)
             });
         }
 
@@ -113,7 +125,8 @@ namespace Xasu.HighLevel
                 result = new Result
                 {
                     response = optionId
-                }
+                },
+                context= GetContext(ContextActivity.SeriousGames)
             });
         }
 
