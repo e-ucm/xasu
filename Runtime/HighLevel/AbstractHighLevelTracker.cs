@@ -19,6 +19,7 @@ namespace Xasu.HighLevel
         public static Dictionary<string, string> ContextActivityIds = new Dictionary<string, string>()
         {
             { "SeriousGames", "https://w3id.org/xapi/seriousgames" },
+            { "Scorm", "https://w3id.org/xapi/scorm/v/2" },
         };
 
         protected Verb GetVerb(Enum verb)

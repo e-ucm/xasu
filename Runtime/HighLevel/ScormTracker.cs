@@ -65,19 +65,6 @@ namespace Xasu.HighLevel
 
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
-
-        protected enum ContextActivity
-        {
-            Scorm
-        }
-
-        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
-        {
-            { ContextActivity.Scorm, "https://w3id.org/xapi/scorm/v/2" },
-        };
-
-        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
-
         /**********************
         * Static attributes
         * *******************/
@@ -107,13 +94,13 @@ namespace Xasu.HighLevel
                 }
             }
 
-            if(addInitializedTime)
+            if (addInitializedTime)
                 initializedTimes.Add(scoId, DateTime.Now);
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Initialized),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context= GetContext(ContextActivity.Scorm)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
         #endregion
@@ -152,15 +139,15 @@ namespace Xasu.HighLevel
             }
 
 
-            if(addSuspendedTime)
+            if (addSuspendedTime)
                 suspendedTimes.Add(scoId, DateTime.Now);
-            
+
             TimeSpan duration = suspendedTimes[scoId] - initializedTimes[scoId];
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Suspended),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context= GetContext(ContextActivity.Scorm),
+                context = XasuTracker.Instance.GetDefaultContext(),
                 result = new Result { duration = duration }
             });
         }
@@ -195,7 +182,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Resumed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = GetContext(ContextActivity.Scorm)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
         #endregion
@@ -213,15 +200,16 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Progressed),
                 target = GetTargetActivity(id, type),
-                result = new Result {
-                    score = new Score { scaled = value,}
+                result = new Result
+                {
+                    score = new Score { scaled = value, }
                 },
-                context= GetContext(ContextActivity.Scorm)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
         #endregion
 
-        
+
         #region Terminated
         /// <summary>
         /// Terminates a SCORM lesson.
@@ -229,7 +217,7 @@ namespace Xasu.HighLevel
         /// <param name="scoId">Identifier of the terminated lesson.</param>
         /// <param name="hasDuration">Whether the duration should be included in the statement.</param>
         /// <param name="durationInSeconds">The duration of the lesson in seconds (optional).</param>
-        public StatementPromise Terminated(string scoId,bool hasDuration=false, long durationInSeconds=0)
+        public StatementPromise Terminated(string scoId, bool hasDuration = false, long durationInSeconds = 0)
         {
             if (!initializedTimes.ContainsKey(scoId))
             {
@@ -245,8 +233,9 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Terminated),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = GetContext(ContextActivity.Scorm),
-                result= new Result {
+                context = XasuTracker.Instance.GetDefaultContext(),
+                result = new Result
+                {
                     duration = duration,
                 }
             });
@@ -268,7 +257,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Passed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context =  GetContext(ContextActivity.Scorm),
+                context = XasuTracker.Instance.GetDefaultContext(),
                 result = new Result
                 {
                     success = true,
@@ -293,7 +282,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Failed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = GetContext(ContextActivity.Scorm),
+                context = XasuTracker.Instance.GetDefaultContext(),
                 result = new Result
                 {
                     success = false,
@@ -318,12 +307,18 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Scored),
                 target = GetTargetActivity(id, type),
-                result = new Result {
+                result = new Result
+                {
                     score = new Score { scaled = value, }
                 },
-                context= GetContext(ContextActivity.Scorm)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
         #endregion
+        
+        protected static StatementPromise Enqueue(Statement statement)
+        {
+            return AbstractHighLevelTracker<ScormTracker>.Enqueue(statement).CreateAndAddContextCategoryProfileActivity(AbstractHighLevelTracker<ScormTracker>.ContextActivityIds["Scorm"]);
+        }
     }
 }
