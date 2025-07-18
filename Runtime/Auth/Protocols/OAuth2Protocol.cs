@@ -142,7 +142,6 @@ namespace Xasu.Auth.Protocols
                 XasuTracker.Instance.Log("[OAuth2] Token obtained: " + token.AccessToken);
                 Agent = new Agent
                 {
-                    name = token.Username,
                     account = new AgentAccount {
                         homePage = homePage,
                         name = token.Username

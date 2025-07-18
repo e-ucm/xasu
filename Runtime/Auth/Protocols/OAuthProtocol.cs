@@ -99,10 +99,9 @@ namespace Xasu.Auth.Protocols
                 }
                 Agent = new Agent
                 {
-                    name = "OAuth with token " + doAccessTokenRequest.OAuthToken,
                     account = new AgentAccount {
                         homePage = homePage,
-                        name = "OAuth with token " + doAccessTokenRequest.OAuthToken
+                        name = doAccessTokenRequest.OAuthToken
                     }
                 };
             } 

@@ -37,6 +37,8 @@ namespace Xasu
         public IAsyncLRS LRS { get; set; }
         public TrackerConfig TrackerConfig { get; private set; }
         public Agent DefaultActor { get; set; }
+        private string username = null;
+        private string email = null;
         public Context DefaultContext { get; set; }
         public string DefaultIdPrefix { get; set; }
 
@@ -63,6 +65,23 @@ namespace Xasu
                 return trackerStatus;
             } 
         }
+
+        public async Task InitOffline(string username=null, string email=null)
+        {
+            TrackerConfig trackerConfig = await TrackerConfigLoader.LoadLocalAsync();
+            if (trackerConfig.Offline)
+            {
+                this.username = username;
+                this.email = email;
+            }
+            else
+            {
+                LogWarning("[TRACKER] Don't use InitOffline() function when using only Online or/and Backup when not AutoStart. Prefer using Init() function.");
+            }
+            // Init with local file config
+            await Init(trackerConfig);
+        }
+
 #if UNITY_5_3_OR_NEWER
         public async Task Init()
         {
@@ -89,6 +108,15 @@ namespace Xasu
                 IProcessor onlineProcessor = null, localProcessor = null, backupProcessor = null;
 
                 // TODO: Implement a ProcessorFactory that performs generic initialization
+                if (TrackerConfig.Offline)
+                {
+                    Log("[TRACKER] Initializing local processor...");
+                    localProcessor = new LocalProcessor(TrackerConfig.FileName, TrackerConfig.TraceFormat);
+
+                    await localProcessor.Init();
+                    processors.Add(localProcessor);
+                }
+
                 if (TrackerConfig.Online)
                 {
                     if (!TrackerConfig.AuthParameters.ContainsKey("lrs_endpoint"))
@@ -121,16 +149,7 @@ namespace Xasu
                     await onlineProcessor.Init();
                     processors.Add(onlineProcessor);
                 }
-
-                if (TrackerConfig.Offline)
-                {
-                    Log("[TRACKER] Initializing local processor...");
-                    localProcessor = new LocalProcessor(TrackerConfig.FileName, TrackerConfig.TraceFormat);
-
-                    await localProcessor.Init();
-                    processors.Add(localProcessor);
-                }
-
+                
                 if (TrackerConfig.Backup)
                 {
                     if (backupAuthorization != null)
@@ -159,9 +178,11 @@ namespace Xasu
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
+
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
 
                 Activity sg = new Activity { id = "https://w3id.org/xapi/seriousgames" };
+
                 List<Activity> list = new List<Activity>();
                 list.Add(sg);
                 DefaultContext = new Context { registration = Guid.NewGuid(), contextActivities = new ContextActivities { category = list } };
