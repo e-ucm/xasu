@@ -120,7 +120,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Initialized),
                 target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 
@@ -147,7 +147,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Progressed),
                 target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             }).WithResultExtension(extensionIds[Extensions.Progress], value);
         }
 
@@ -219,7 +219,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Completed),
                 target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             }).WithCompletion(true)
             .WithTimeSpanDuration(duration);
         }

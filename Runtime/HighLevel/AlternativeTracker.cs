@@ -79,7 +79,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Selected),
                 target = GetTargetActivity(alternativeId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             }).WithResponse(optionId);
         }
 
@@ -106,7 +106,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Unlocked),
                 target = GetTargetActivity(alternativeId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             }).WithResponse(optionId);
         }
     }

@@ -40,12 +40,13 @@ namespace Xasu
         public Agent DefaultActor { get; set; }
         private string username = null;
         private string email = null;
-        public Context DefaultContext { get; set; }
-        public Context GetDefaultContext()
+        private Context defaultContext;
+        public Context DefaultContext
         {
-            return new Context(new StringOfJSON(DefaultContext.ToJSON()));
+            get { return new Context(new StringOfJSON(defaultContext.ToJSON())); }  // your json copy 
+            set { defaultContext = new Context(new StringOfJSON(value.ToJSON())); }
         }
-        
+
         public Guid DefaultContextRegistrationId { get; set; }
         public string DefaultIdPrefix { get; set; }
 
@@ -188,9 +189,9 @@ namespace Xasu
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
 
-                if (DefaultContext == null)
+                if (defaultContext == null)
                 {
-                    DefaultContext = new Context { };
+                    defaultContext = new Context { };
                 }
                 if (DefaultContextRegistrationId == null)
                 {

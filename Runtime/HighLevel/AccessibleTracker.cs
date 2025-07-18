@@ -75,7 +75,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Accessed),
                 target = GetTargetActivity(reachableId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 
@@ -100,7 +100,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Skipped),
                 target = GetTargetActivity(reachableId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 

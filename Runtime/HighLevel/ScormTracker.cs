@@ -100,7 +100,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Initialized),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
         #endregion
@@ -142,14 +142,12 @@ namespace Xasu.HighLevel
             if (addSuspendedTime)
                 suspendedTimes.Add(scoId, DateTime.Now);
 
-            TimeSpan duration = suspendedTimes[scoId] - initializedTimes[scoId];
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Suspended),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext(),
-                result = new Result { duration = duration }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithDuration(initializedTimes[scoId], suspendedTimes[scoId]);
         }
         #endregion
 
@@ -182,7 +180,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Resumed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
         #endregion
@@ -200,12 +198,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Progressed),
                 target = GetTargetActivity(id, type),
-                result = new Result
-                {
-                    score = new Score { scaled = value, }
-                },
-                context = XasuTracker.Instance.GetDefaultContext()
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithScoreScaled(value);
         }
         #endregion
 
@@ -233,12 +227,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Terminated),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext(),
-                result = new Result
-                {
-                    duration = duration,
-                }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithTimeSpanDuration(duration);
         }
         #endregion
 
@@ -257,14 +247,10 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Passed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext(),
-                result = new Result
-                {
-                    success = true,
-                    score = float.IsNaN(score) ? null : new Score { scaled = score },
-                    duration = TimeSpan.FromSeconds(durationInSeconds)
-                }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithSuccess(true)
+            .WithScoreScaled(score)
+            .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));;
         }
 
         #endregion
@@ -282,14 +268,10 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Failed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.GetDefaultContext(),
-                result = new Result
-                {
-                    success = false,
-                    score = score == float.NaN ? null : new Score { scaled = score },
-                    duration = TimeSpan.FromSeconds(durationInSeconds)
-                }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithSuccess(false)
+            .WithScoreScaled(score)
+            .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));
         }
 
         #endregion
@@ -307,12 +289,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Scored),
                 target = GetTargetActivity(id, type),
-                result = new Result
-                {
-                    score = new Score { scaled = value, }
-                },
-                context = XasuTracker.Instance.GetDefaultContext()
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithScoreScaled(value);
         }
         #endregion
         

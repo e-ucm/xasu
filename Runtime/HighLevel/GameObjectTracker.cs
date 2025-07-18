@@ -68,7 +68,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Interacted),
                 target = GetTargetActivity(gameobjectId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 
@@ -92,7 +92,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Used),
                 target = GetTargetActivity(gameobjectId, type),
-                context = XasuTracker.Instance.GetDefaultContext()
+                context = XasuTracker.Instance.DefaultContext
             });
         }
     }
