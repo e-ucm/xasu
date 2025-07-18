@@ -79,7 +79,7 @@ namespace Xasu
                 LogWarning("[TRACKER] Don't use InitOffline() function when using only Online or/and Backup when not AutoStart. Prefer using Init() function.");
             }
             // Init with local file config
-            await Init(trackerConfig);
+            await Init(trackerConfig, new UnityRequestHandler());
         }
 
 #if UNITY_5_3_OR_NEWER
