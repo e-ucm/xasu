@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -63,6 +64,8 @@ namespace Xasu.Auth.Protocols
         */
 
         public IAsyncPolicy Policy { get; set; }
+        
+        public IHttpRequestHandler RequestHandler { get; set; }
 
         public AuthState State { get; protected set; }
 
@@ -173,7 +176,7 @@ namespace Xasu.Auth.Protocols
             }
         }
 
-        private static async Task<OAuth2Token> DoAccessCodeFlow(string authUrl, string tokenUrl, string clientId, PKCETypes pkceType,
+        private async Task<OAuth2Token> DoAccessCodeFlow(string authUrl, string tokenUrl, string clientId, PKCETypes pkceType,
             string scope, string state, string tokenValue, string login_hint)
         {
             // Generate PKCE
@@ -207,7 +210,7 @@ namespace Xasu.Auth.Protocols
             return await DoTokenRequest(tokenUrl, clientId, "authorization_code", form);
         }
 
-        private static async Task<OAuth2Token> DoResourceOwnedPasswordCredentialsFlow(string tokenUrl, string clientId, string username, string password, 
+        private async Task<OAuth2Token> DoResourceOwnedPasswordCredentialsFlow(string tokenUrl, string clientId, string username, string password, 
             string scope, string state, string login_hint)
         {
             var form = new Dictionary<string, string>()
@@ -235,7 +238,7 @@ namespace Xasu.Auth.Protocols
         }
 
 
-        private static async Task<OAuth2AuthorizationCode> DoAuthorizeRequest(string authorizeEndpoint, string clientId, string scope, string state, string tokenValue, string login_hint, string redirectUrl, OAuth2Listener listener, PKCETypes pkceType, string codeChallenge = null)
+        private async Task<OAuth2AuthorizationCode> DoAuthorizeRequest(string authorizeEndpoint, string clientId, string scope, string state, string tokenValue, string login_hint, string redirectUrl, OAuth2Listener listener, PKCETypes pkceType, string codeChallenge = null)
         {
             var parameters = new Dictionary<string, string>()
             {
@@ -281,7 +284,7 @@ namespace Xasu.Auth.Protocols
 
                 if(authorizeResponse == null)
                 {
-                    var url = RequestsUtility.AppendParamsToExistingQueryString(authorizeEndpoint + "?", parameters);
+                    var url = RequestHandler.AppendParamsToExistingQueryString(authorizeEndpoint + "?", parameters);
                     AuthUtility.OpenUrl(url);
                     while (authorizeResponse == null)
                     {
@@ -298,7 +301,7 @@ namespace Xasu.Auth.Protocols
             }
         }
 
-        private static async Task<OAuth2Token> DoTokenRequest(string tokenUrl, string clientId, string grantType, Dictionary<string, string> otherParams)
+        private async Task<OAuth2Token> DoTokenRequest(string tokenUrl, string clientId, string grantType, Dictionary<string, string> otherParams)
         {
             if (grantType != "authorization_code" && grantType != "password" && grantType != "refresh_token")
             {
@@ -332,9 +335,8 @@ namespace Xasu.Auth.Protocols
             uwr.uploadHandler = uH;
             uwr.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             */
-            var req = UnityWebRequest.Post(tokenUrl, form);
 
-            return await DoAuthorizationRequest(clientId, req);
+            return await DoAuthorizationRequest(clientId, new MyHttpRequest { url = tokenUrl, method = "POST", form = form, policy = Policy });
         }
 
         private async Task<OAuth2Token> DoRefreshToken(string tokenUrl, string clientId, string refresh_token)
@@ -346,11 +348,12 @@ namespace Xasu.Auth.Protocols
                 });
         }
 
-        private static async Task<OAuth2Token> DoAuthorizationRequest(string clientId, UnityWebRequest uwr)
+        private async Task<OAuth2Token> DoAuthorizationRequest(string clientId, MyHttpRequest httpRequest)
         {
             try
             {
-                var authInfo = await RequestsUtility.DoRequest<OAuth2Token>(uwr);
+                var response = await RequestHandler.SendRequest(httpRequest);
+                var authInfo = JsonConvert.DeserializeObject<OAuth2Token>(Encoding.UTF8.GetString(response.content));
                 authInfo.ClientId = clientId;
                 return authInfo;
             }

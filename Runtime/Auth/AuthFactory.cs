@@ -4,13 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xasu.Auth.Protocols;
+using Xasu.Exceptions;
+using Xasu.Requests;
 
 namespace Xasu.Auth
 {
     /// <summary>
     /// Auth Manager manages the available authorization protocols and their initialization and continuation.
     /// </summary>
-    public static class AuthManager
+    public static class AuthFactory
     {
         private const string notSupportedAuthMessage = "Authorization type \"{0}\" not supported. Accepted types: basic, oauth and oauth2.";
 
@@ -22,7 +24,7 @@ namespace Xasu.Auth
             { "cmi5", new Cmi5Protocol() }
         };
 
-        public static async Task<IAuthProtocol> InitAuth(string authName, IDictionary<string, string> parameters, IAsyncPolicy policy)
+        public static async Task<IAuthProtocol> InitAuth(string authName, IDictionary<string, string> parameters, IHttpRequestHandler requestHandler = null, IAsyncPolicy policy = null)
         {
             if (authName == null || authName == "none" || authName == "disabled")
             {
@@ -32,6 +34,11 @@ namespace Xasu.Auth
             if (!authProtocols.ContainsKey(authName))
             {
                 throw new NotSupportedException(string.Format(notSupportedAuthMessage, authName));
+            }
+
+            if (requestHandler != null)
+            {
+                authProtocols[authName].RequestHandler = requestHandler;
             }
             
             if (policy != null)

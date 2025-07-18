@@ -22,17 +22,19 @@ namespace Xasu.Processors
         private readonly JObject backupRequestParameters;
         private IAuthProtocol authorization;
         private IAsyncPolicy policy;
+        private IHttpRequestHandler requestHandler;
 
         public BackupProcessor(string backupFileName, TraceFormats traceFormat, string backupEndpoint,
-            JObject backupRequestParameters, IAuthProtocol authorization, IAsyncPolicy policy)
-            : this(backupFileName, traceFormat, TCAPIVersion.V103, backupEndpoint, backupRequestParameters, authorization, policy)
+            JObject backupRequestParameters, IHttpRequestHandler requestHandler, IAuthProtocol authorization, IAsyncPolicy policy)
+            : this(backupFileName, traceFormat, TCAPIVersion.V103, backupEndpoint, backupRequestParameters, requestHandler, authorization, policy)
         {
         }
 
         public BackupProcessor(string backupFileName, TraceFormats traceFormat, TCAPIVersion version, string backupEndpoint, 
-            JObject backupRequestParameters, IAuthProtocol authorization, IAsyncPolicy policy) : base(backupFileName, traceFormat, version, true)
+            JObject backupRequestParameters, IHttpRequestHandler requestHandler, IAuthProtocol authorization, IAsyncPolicy policy) : base(backupFileName, traceFormat, version, true)
         {
             this.backupEndpoint = backupEndpoint;
+            this.requestHandler = requestHandler;
             this.backupRequestParameters = backupRequestParameters;
             this.authorization = authorization;
             this.policy = policy;
@@ -96,7 +98,7 @@ namespace Xasu.Processors
                     }
                 }
 
-                var myResponse = await RequestsUtility.DoRequest(myRequest, progress);
+                var myResponse = await requestHandler.SendRequest(myRequest, progress);
 
                 // Response.success == false
                 if (myResponse.ex is APIException apiEx)

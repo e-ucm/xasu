@@ -12,11 +12,13 @@ using Xasu.Auth.Protocols;
 using Xasu.Exceptions;
 using TinCan;
 using UnityEngine;
+using Xasu.Requests;
 
 namespace Xasu
 {
     public class XasuTracker : Singleton<XasuTracker>
     {
+        private IHttpRequestHandler requestHandler;
         public bool AutoStart = false;
         public bool EnableDebugLogging = false;
 
@@ -80,13 +82,15 @@ namespace Xasu
             await Init(trackerConfig);
         }
 
+#if UNITY_5_3_OR_NEWER
         public async Task Init()
         {
             // Init with local file config
-            await Init(await TrackerConfigLoader.LoadLocalAsync());
+            await Init(await TrackerConfigLoader.LoadLocalAsync(), new UnityRequestHandler());
         }
+#endif
 
-        public async Task Init(TrackerConfig trackerConfig, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null, bool EnableLogs=false)
+        public async Task Init(TrackerConfig trackerConfig,  IHttpRequestHandler requestHandler, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null, bool EnableLogs=false)
         {
             if(!EnableLogs == false) {
                 EnableDebugLogging=EnableLogs;
@@ -123,7 +127,7 @@ namespace Xasu
                     {
                         TrackerConfig.AuthParameters["homepage"] = TrackerConfig.HomePage;
                     }
-                    onlineAuthProtocol = onlineAuthorization ?? await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null); // TODO: Auth Policies
+                    onlineAuthProtocol = onlineAuthorization ?? await AuthFactory.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, requestHandler, null); // TODO: Auth Policies
                     if (onlineAuthProtocol?.State == AuthState.Errored)
                     {
                         LogError("[TRACKER] Failed to initialize auth for LRS: " + onlineAuthProtocol.ErrorMessage);
@@ -133,13 +137,13 @@ namespace Xasu
                     if (onlineAuthProtocol is Cmi5Protocol)
                     {
                         Log("[TRACKER] Initializing cmi5 online processor...");
-                        onlineProcessor = new Cmi5Processor(TrackerConfig.BatchSize, onlineAuthProtocol, false);
+                        onlineProcessor = new Cmi5Processor(TrackerConfig.BatchSize, onlineAuthProtocol, requestHandler, false);
                     }
                     else
                     {
                         Log("[TRACKER] Initializing online processor...");
                         onlineProcessor = new OnlineProcessor(TrackerConfig.LRSEndpoint, TCAPIVersion.V103,
-                            TrackerConfig.BatchSize, onlineAuthProtocol, TrackerConfig.Fallback);
+                            TrackerConfig.BatchSize, onlineAuthProtocol, requestHandler, TrackerConfig.Fallback);
                     }
 
                     await onlineProcessor.Init();
@@ -156,7 +160,7 @@ namespace Xasu
                     {
                         backupAuthProtocol = TrackerConfig.BackupAuthProtocol == "same"
                             ? onlineAuthProtocol
-                            : await AuthManager.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, null);
+                            : await AuthFactory.InitAuth(TrackerConfig.AuthProtocol, TrackerConfig.AuthParameters, requestHandler, null);
                     }
 
                     if (backupAuthProtocol != null && backupAuthProtocol.State == AuthState.Errored)
@@ -167,20 +171,22 @@ namespace Xasu
 
                     Log("[TRACKER] Initializing backup processor...");
                     backupProcessor = new BackupProcessor(TrackerConfig.BackupFileName, TrackerConfig.BackupTraceFormat,
-                        TrackerConfig.BackupEndpoint, TrackerConfig.BackupRequestConfig, backupAuthProtocol, null); // TODO: Backup policy
+                        TrackerConfig.BackupEndpoint, TrackerConfig.BackupRequestConfig, requestHandler, backupAuthProtocol, null); // TODO: Backup policy
 
                     await backupProcessor.Init();
                     processors.Add(backupProcessor);
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
-                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
-                
-                Activity sg = new Activity  { id = "https://w3id.org/xapi/seriousgames" };
+
+                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
+
+                Activity sg = new Activity { id = "https://w3id.org/xapi/seriousgames" };
+
                 List<Activity> list = new List<Activity>();
                 list.Add(sg);
-                DefaultContext = new Context { registration = Guid.NewGuid(),contextActivities=new ContextActivities{ category = list } };
-                
+                DefaultContext = new Context { registration = Guid.NewGuid(), contextActivities = new ContextActivities { category = list } };
+
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
@@ -204,7 +210,7 @@ namespace Xasu
                 LogError("[TRACKER] Init exception!", ex);
                 throw;
             }
-            
+
         }
 
         public async Task Finalize(IProgress<float> progress = null)
@@ -227,7 +233,7 @@ namespace Xasu
             }
 
             finalizeRequested = true;
-            
+
             try
             {
                 await LockProcessing();
@@ -273,10 +279,10 @@ namespace Xasu
 
             flushRequested = true;
 
-            while(flushRequested)
+            while (flushRequested)
             {
                 await Task.Yield();
-                if (Status.LoopException != null) 
+                if (Status.LoopException != null)
                 {
                     throw new TrackerException("An exception ocurred during trace submission!", Status.LoopException);
                 }
@@ -335,7 +341,7 @@ namespace Xasu
 
         public async Task ResetState()
         {
-            foreach(var p in traceProcessors)
+            foreach (var p in traceProcessors)
             {
                 await p.Reset();
             }
@@ -363,7 +369,7 @@ namespace Xasu
                         currentTime = 0;
                         foreach (var p in traceProcessors)
                         {
-                            if(p.State != ProcessorState.Working && p.State != ProcessorState.Fallback)
+                            if (p.State != ProcessorState.Working && p.State != ProcessorState.Fallback)
                             {
                                 continue;
                             }
@@ -380,7 +386,7 @@ namespace Xasu
                     }
 
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 Status.LoopException = ex;
@@ -454,13 +460,13 @@ namespace Xasu
             return (currentTime > processingLoopTime || flushRequested) && !finalizeRequested;
         }
 
-#endregion
+        #endregion
 
         internal void LogError(string error, Exception ex = null)
         {
             // Output unity console log
             Debug.LogError("[Xasu] " + error);
-            if(ex!= null)
+            if (ex != null)
             {
                 Debug.LogException(new TrackerException(error, ex));
             }
@@ -495,4 +501,3 @@ namespace Xasu
         }
     }
 }
-

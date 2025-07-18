@@ -19,6 +19,7 @@ namespace Xasu
         public string endpoint { get; set; }
         public TCAPIVersion version { get; set; }
         public IAuthProtocol auth { get; set; }
+        public IHttpRequestHandler requestHandler { get; set; }
         public Dictionary<String, String> extended { get; set; } = new Dictionary<String, String>();
 
         public AsyncPolicy policy { get; set; }
@@ -72,7 +73,7 @@ namespace Xasu
                 req.policy = policy;
             }
 
-            return await RequestsUtility.DoRequest(req);
+            return await requestHandler.SendRequest(req);
         }
 
         private async Task<MyHttpResponse> GetDocument(String resource, Dictionary<String, String> queryParams, Document document)

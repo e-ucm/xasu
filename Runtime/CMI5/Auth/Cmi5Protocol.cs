@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Polly;
 using TinCan;
 using UnityEngine.Auth.Protocols.Cmi5;
-using UnityEngine.Networking;
 using Xasu.CMI5;
 using Xasu.Exceptions;
 using Xasu.Requests;
@@ -12,7 +12,11 @@ namespace Xasu.Auth.Protocols
 {
     public class Cmi5Protocol : IAuthProtocol
     {
+        private readonly IHttpRequestHandler requestHandler;
+
         public IAsyncPolicy Policy { get; set; }
+
+        public IHttpRequestHandler RequestHandler { get; set; }
 
         public Agent Agent => Cmi5Helper.Actor;
 
@@ -29,13 +33,21 @@ namespace Xasu.Auth.Protocols
             auth = await DoFetch(Cmi5Helper.Fetch, Policy);
         }
 
-        private static async Task<Cmi5Fetch> DoFetch(System.Uri fetchUrl, IAsyncPolicy policy)
+        private async Task<Cmi5Fetch> DoFetch(System.Uri fetchUrl, IAsyncPolicy policy)
         {
-            #if UNITY_2022_2_OR_NEWER
-                return await RequestsUtility.DoRequest<Cmi5Fetch>(UnityWebRequest.PostWwwForm(fetchUrl, ""));
-            #else
-                return await RequestsUtility.DoRequest<Cmi5Fetch>(UnityWebRequest.Post(fetchUrl, ""));
-            #endif
+            var request = new MyHttpRequest
+            {
+                url = fetchUrl.ToString(),
+                method = "POST"
+            };
+            request.policy = policy;
+            var response = await RequestHandler.SendRequest(request);
+            return DeserializeFromResponse<Cmi5Fetch>(response);
+        }
+
+        private static T DeserializeFromResponse<T>(MyHttpResponse response)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(response.content));
         }
 
         public Task UpdateParamsForAuth(MyHttpRequest request)

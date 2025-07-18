@@ -15,6 +15,7 @@ namespace Xasu.Auth.Protocols
         void Unauthorized(APIException apiException);
         void Forbidden(APIException apiException);
         IAsyncPolicy Policy { get; set; }
+        IHttpRequestHandler RequestHandler { get; set; }
         Task Init(IDictionary<string, string> config);
         Task UpdateParamsForAuth(MyHttpRequest request);
     }
