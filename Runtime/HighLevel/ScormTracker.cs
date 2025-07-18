@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using TinCan;
-using Xasu.CMI5;
 using Xasu.Exceptions;
 using Xasu.Processors;
 
@@ -15,14 +14,14 @@ namespace Xasu.HighLevel
         * *******************/
         public enum Verb
         {
-            Initialized,
-            Suspended,
-            Resumed,
-            Terminated,
-            Progressed,
-            Passed,
-            Failed,
-            Scored
+            Initialized, // Player initialized a lesson.
+            Suspended,   // Player suspended a lesson.
+            Resumed,    // Player resumed a lesson.
+            Terminated, // Player terminated a lesson.
+            Progressed, // Player progressed in a lesson.
+            Passed,     // Learner attempted and succeeded in a judged activity.
+            Failed,      // Learner attempted and failed in a judged activity.
+            Scored      // Player scored in a lesson.
         }
 
         public Dictionary<Enum, string> verbIds = new Dictionary<Enum, string>()
@@ -40,13 +39,13 @@ namespace Xasu.HighLevel
 
         public enum ScormType
         {
-            SCO,
-            Course,
-            Module,
-            Assessment,
-            Interaction,
-            Objective,
-            Attempt
+            SCO,         // Sharable Content Object Reference Model
+            Course,      // A course or curriculum.
+            Module,      // A module within a course or curriculum.
+            Assessment,  // An assessment or quiz.
+            Interaction, // An interactive element, such as a game or simulation.
+            Objective,   // A learning objective or goal.
+            Attempt     // An attempt or submission of an activity.
         }
 
         /**********************
@@ -89,10 +88,9 @@ namespace Xasu.HighLevel
 
         #region Initialized
         /// <summary>
-        /// Player initialized a lesson.
-        /// Type : SCO
+        /// Initializes a SCORM lesson.
         /// </summary>
-        /// <param name="scoId">Identifier.</param>
+        /// <param name="scoId">The ID of the lesson to initialize.</param>
         public StatementPromise Initialized(string scoId)
         {
             bool addInitializedTime = true;
@@ -122,10 +120,9 @@ namespace Xasu.HighLevel
 
         #region Suspended
         /// <summary>
-        /// Player Suspended a lesson.
-        /// Type : SCO
+        /// Suspends a SCORM lesson.
         /// </summary>
-        /// <param name="scoId">Identifier.</param>
+        /// <param name="scoId">Identifier of the suspended lesson.</param>
         public StatementPromise Suspended(string scoId)
         {
             bool addSuspendedTime = true;
@@ -169,12 +166,11 @@ namespace Xasu.HighLevel
         }
         #endregion
 
-         #region Resumed
+        #region Resumed
         /// <summary>
-        /// Player Resumed a lesson.
-        /// Type : SCO
+        /// Resumes a suspended SCORM lesson.
         /// </summary>
-        /// <param name="scoId">Identifier.</param>
+        /// <param name="scoId">Identifier of the resumed lesson.</param>
         public StatementPromise Resumed(string scoId)
         {
             bool addResumedTime = true;
@@ -191,26 +187,26 @@ namespace Xasu.HighLevel
                 }
             }
 
-            if(addResumedTime)
+            if (addResumedTime)
                 initializedTimes.Remove(scoId);
-                initializedTimes.Add(scoId, DateTime.Now);
-                suspendedTimes.Remove(scoId);
+            initializedTimes.Add(scoId, DateTime.Now);
+            suspendedTimes.Remove(scoId);
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Resumed),
                 target = GetTargetActivity(scoId, ScormType.SCO),
-                context= GetContext(ContextActivity.Scorm)
+                context = GetContext(ContextActivity.Scorm)
             });
         }
         #endregion
 
         #region Progressed
         /// <summary>
-        /// Player progressed.
+        /// Tracks progress in a SCORM activity.
         /// </summary>
-        /// <param name="id">Identifier.</param>
+        /// <param name="id">The ID of the activity being progressed.</param>
+        /// <param name="type">Type of the activity.</param>
         /// <param name="value">New value for the progress.</param>
-        /// <param name="type">Type.</param>
         public StatementPromise Progressed(string id, ScormType type, float value)
         {
             return Enqueue(new Statement
@@ -228,27 +224,27 @@ namespace Xasu.HighLevel
         
         #region Terminated
         /// <summary>
-        /// Player terminated a lesson.
-        /// Type = SCO 
+        /// Terminates a SCORM lesson.
         /// </summary>
-        /// <param name="id">AU id.</param>
-        /// <param name="type">AU type.</param>
-        public StatementPromise Terminated(string id,bool hasDuration=false, long durationInSeconds=0)
+        /// <param name="scoId">Identifier of the terminated lesson.</param>
+        /// <param name="hasDuration">Whether the duration should be included in the statement.</param>
+        /// <param name="durationInSeconds">The duration of the lesson in seconds (optional).</param>
+        public StatementPromise Terminated(string scoId,bool hasDuration=false, long durationInSeconds=0)
         {
-            if (!initializedTimes.ContainsKey(id))
+            if (!initializedTimes.ContainsKey(scoId))
             {
                 throw new XApiException("The Terminated statement for the specified id has not been initialized!");
             }
 
             // Get the initialized statement time to calculate the duration
-            DateTime ticks = initializedTimes[id];
-            initializedTimes.Remove(id);
+            DateTime ticks = initializedTimes[scoId];
+            initializedTimes.Remove(scoId);
 
             TimeSpan duration = hasDuration ? TimeSpan.FromSeconds(durationInSeconds) : DateTime.Now - ticks;
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Terminated),
-                target = GetTargetActivity(id, ScormType.SCO),
+                target = GetTargetActivity(scoId, ScormType.SCO),
                 context = GetContext(ContextActivity.Scorm),
                 result= new Result {
                     duration = duration,
@@ -261,17 +257,17 @@ namespace Xasu.HighLevel
         #region Passed
 
         /// <summary>
-        /// The learner attempted and succeeded in a judged activity in the AU.
+        /// The learner attempted and succeeded in a SCORM lesson.
         /// </summary>
-        /// <param name="id">AU id.</param>
-        /// <param name="type">AU type.</param>
+        /// <param name="scoId">Identifier of the passed lesson.</param>
         /// <param name="score">The score scaled.</param>
-        public StatementPromise Passed(string id, float score, double durationInSeconds)
+        /// <param name="durationInSeconds">The duration of the lesson in seconds (optional).</param>
+        public StatementPromise Passed(string scoId, float score, double durationInSeconds)
         {
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Passed),
-                target = GetTargetActivity(id, ScormType.SCO),
+                target = GetTargetActivity(scoId, ScormType.SCO),
                 context =  GetContext(ContextActivity.Scorm),
                 result = new Result
                 {
@@ -286,19 +282,17 @@ namespace Xasu.HighLevel
 
         #region Failed
         /// <summary>
-        /// The learner attempted and failed in a judged activity in the AU.
-        /// The (scaled) score MUST be lower than the "masteryScore"
-        /// indicated in the LMS Launch Data.
+        /// The learner attempted and failed in a judged SCORM lesson.
         /// </summary>
-        /// <param name="id">AU id.</param>
-        /// <param name="type">AU type.</param>
+        /// <param name="scoId">Identifier of the failed lesson.</param>
         /// <param name="score">The score scaled.</param>
-        public StatementPromise Failed(string id, float score, double durationInSeconds)
+        /// <param name="durationInSeconds">The duration of the lesson in seconds (optional).</param>
+        public StatementPromise Failed(string scoId, float score, double durationInSeconds)
         {
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Failed),
-                target = GetTargetActivity(id, ScormType.SCO),
+                target = GetTargetActivity(scoId, ScormType.SCO),
                 context = GetContext(ContextActivity.Scorm),
                 result = new Result
                 {
@@ -313,11 +307,11 @@ namespace Xasu.HighLevel
 
         #region Scored
         /// <summary>
-        /// Player scored.
+        /// The player scored.
         /// </summary>
-        /// <param name="id">Identifier.</param>
+        /// <param name="id">Identifier of the activity being scored.</param>
+        /// <param name="type">Type of the activity.</param>
         /// <param name="value">New value for the score.</param>
-        /// <param name="type">Type.</param>
         public StatementPromise Scored(string id, ScormType type, float value)
         {
             return Enqueue(new Statement
@@ -331,7 +325,5 @@ namespace Xasu.HighLevel
             });
         }
         #endregion
-
-
     }
 }
