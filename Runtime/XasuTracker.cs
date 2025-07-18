@@ -66,6 +66,7 @@ namespace Xasu
             } 
         }
 
+#if UNITY_5_3_OR_NEWER
         public async Task InitOffline(string username=null, string email=null)
         {
             TrackerConfig trackerConfig = await TrackerConfigLoader.LoadLocalAsync();
@@ -82,7 +83,6 @@ namespace Xasu
             await Init(trackerConfig, new UnityRequestHandler());
         }
 
-#if UNITY_5_3_OR_NEWER
         public async Task Init()
         {
             // Init with local file config
