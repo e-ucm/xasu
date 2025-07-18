@@ -41,6 +41,10 @@ namespace Xasu.HighLevel
         }
 
         StatementPromise AddContextGroupingActivity(Activity contextActivity) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
             if (Statement.context.contextActivities == null)
             {
                 Statement.context.contextActivities = new ContextActivities();
@@ -53,7 +57,12 @@ namespace Xasu.HighLevel
         }
         
         StatementPromise AddContextRegistration(Guid registrationId) {
-            if(Statement.context.registration == null) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
+            if (Statement.context.registration == null)
+            {
                 Statement.context.registration = registrationId;
             }
             return this;
@@ -79,6 +88,10 @@ namespace Xasu.HighLevel
         }
 
         StatementPromise AddContextParentActivity(Activity contextActivity) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
             if (Statement.context.contextActivities == null)
             {
                 Statement.context.contextActivities = new ContextActivities();
@@ -110,6 +123,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise AddContextCategoryActivity(Activity activity)
         {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
             if (Statement.context.contextActivities == null)
             {
                 Statement.context.contextActivities = new ContextActivities();
@@ -124,12 +141,20 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithSuccess(bool success)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.success = success;
             return this;
         }
 
         public StatementPromise WithScore(Dictionary<string, double> scores)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -151,6 +176,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreRaw(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -161,6 +190,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreMin(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -171,6 +204,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreMax(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -181,6 +218,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreScaled(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -191,25 +232,51 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithCompletion(bool completion)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.completion = completion;
             return this;
         }
 
         public StatementPromise WithDuration(DateTime init, DateTime end)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             TimeSpan duration = end - init;
+            Statement.result.duration = duration;
+            return this;
+        }
+
+        public StatementPromise WithTimeSpanDuration(TimeSpan duration)
+        {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.duration = duration;
             return this;
         }
 
         public StatementPromise WithResponse(string response)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.response = response;
             return this;
         }
 
         public StatementPromise WithResultExtension(string key, object value)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Dictionary<string, object> extensions = new Dictionary<string, object>();
             extensions.Add(key, value);
             Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
@@ -218,6 +285,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithResultExtensions(Dictionary<string, object> extensions)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
             return this;
         }
@@ -225,6 +296,10 @@ namespace Xasu.HighLevel
         
         public StatementPromise WithContextExtensions(Dictionary<string, object> extensions)
         {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
             Statement.context.extensions = AddExtensions(Statement.result.extensions, extensions);
             return this;
         }

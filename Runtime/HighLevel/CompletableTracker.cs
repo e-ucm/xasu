@@ -147,12 +147,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Progressed),
                 target = GetTargetActivity(completableId, type),
-                result = SetResultExtensions(new Result(), new Dictionary<Enum, object>
-                {
-                    { Extensions.Progress, value }
-                }),
                 context = XasuTracker.Instance.GetDefaultContext()
-            });
+            }).WithResultExtension(extensionIds[Extensions.Progress], value);
         }
 
         /// <summary>
@@ -219,20 +215,13 @@ namespace Xasu.HighLevel
                 initializedTimes.Remove(completableId);
             }
 
-            var result = new Result{ completion = true };
-            if (!hasDuration || durationInSeconds > 0f)
-            {
-                result.duration = duration;
-            }
-
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Completed),
                 target = GetTargetActivity(completableId, type),
-                result = result,
                 context = XasuTracker.Instance.GetDefaultContext()
-            });
+            }).WithCompletion(true)
+            .WithTimeSpanDuration(duration);
         }
-
     }
 }
