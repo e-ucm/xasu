@@ -21,7 +21,7 @@ namespace Xasu.HighLevel
             this.Promise = task;
         }
 
-        public StatementPromise CreateAndAddContextGroupingActivity(string id, string name, string description, Uri type)
+        public StatementPromise CreateAndAddContextGroupingActivity(string id, string name, string description, string type)
         {
             Activity act = new Activity
             {
@@ -34,7 +34,7 @@ namespace Xasu.HighLevel
                     //description= new LanguageMap  {
                     //	"en-US"=description,
                     //},
-                    type = type,
+                    type = new Uri(type),
                 }
             };
             return this.AddContextGroupingActivity(act);
@@ -68,7 +68,7 @@ namespace Xasu.HighLevel
             return this;
         }
         
-         public StatementPromise CreateAndAddContextParentActivity(string id, string name, string description, Uri type)
+         public StatementPromise CreateAndAddContextParentActivity(string id, string name, string description, string type)
         {
             Activity act = new Activity
             {
@@ -81,7 +81,7 @@ namespace Xasu.HighLevel
                     //description= new LanguageMap  {
                     //	"en-US"=description,
                     //},
-                    type = type,
+                    type = new Uri(type),
                 }
             };
             return this.AddContextParentActivity(act);
@@ -105,17 +105,17 @@ namespace Xasu.HighLevel
 
         public StatementPromise CreateAndAddContextCategoryProfileActivity(string id)
         {
-            return this.CreateAndAddContextCategoryActivity(id, new Uri("http://adlnet.gov/expapi/activities/profile"));
+            return this.CreateAndAddContextCategoryActivity(id, "http://adlnet.gov/expapi/activities/profile");
         }
 
-        public StatementPromise CreateAndAddContextCategoryActivity(string id, Uri typeUri = null)
+        public StatementPromise CreateAndAddContextCategoryActivity(string id, string typeUri = null)
         {
             Activity activity = new Activity { id = id };
             if (typeUri != null)
             {
                 activity.definition = new ActivityDefinition
                 {
-                    type = typeUri,
+                    type = new Uri(typeUri),
                 };
             }
             return this.AddContextCategoryActivity(activity);
@@ -293,14 +293,25 @@ namespace Xasu.HighLevel
             return this;
         }
 
-        
-        public StatementPromise WithContextExtensions(Dictionary<string, object> extensions)
+        public StatementPromise WithContextExtension(string key, object value)
         {
-            if (Statement.context== null)
+            if (Statement.result== null)
             {
                 Statement.context = new Context();
             }
-            Statement.context.extensions = AddExtensions(Statement.result.extensions, extensions);
+            Dictionary<string, object> extensions = new Dictionary<string, object>();
+            extensions.Add(key, value);
+            Statement.result.extensions = AddExtensions(Statement.context.extensions, extensions);
+            return this;
+        }
+
+        public StatementPromise WithContextExtensions(Dictionary<string, object> extensions)
+        {
+            if (Statement.context == null)
+            {
+                Statement.context = new Context();
+            }
+            Statement.context.extensions = AddExtensions(Statement.context.extensions, extensions);
             return this;
         }
 
