@@ -11,6 +11,7 @@ using Xasu.Config;
 using Xasu.Auth.Protocols;
 using Xasu.Exceptions;
 using TinCan;
+using TinCan.Json;
 using UnityEngine;
 using Xasu.Requests;
 
@@ -39,6 +40,12 @@ namespace Xasu
         public Agent DefaultActor { get; set; }
         private string username = null;
         private string email = null;
+        public Context DefaultContext { get; set; }
+        public Context GetDefaultContext()
+        {
+            return new Context(new StringOfJSON(DefaultContext.ToJSON()));
+        }
+        
         public Guid DefaultContextRegistrationId { get; set; }
         public string DefaultIdPrefix { get; set; }
 
@@ -92,8 +99,9 @@ namespace Xasu
 
         public async Task Init(TrackerConfig trackerConfig,  IHttpRequestHandler requestHandler, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null, bool EnableLogs=false)
         {
-            if(!EnableLogs == false) {
-                EnableDebugLogging=EnableLogs;
+            if (!EnableLogs == false)
+            {
+                EnableDebugLogging = EnableLogs;
             }
             try
             {
@@ -149,7 +157,7 @@ namespace Xasu
                     await onlineProcessor.Init();
                     processors.Add(onlineProcessor);
                 }
-                
+
                 if (TrackerConfig.Backup)
                 {
                     if (backupAuthorization != null)
@@ -179,8 +187,15 @@ namespace Xasu
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
-                
-                DefaultContextRegistrationId = Guid.NewGuid();
+
+                if (DefaultContext == null)
+                {
+                    DefaultContext = new Context { };
+                }
+                if (DefaultContextRegistrationId == null)
+                {
+                    DefaultContextRegistrationId = Guid.NewGuid();
+                }
                 LogWarning("[TRACKER] " + DefaultContextRegistrationId);
                 traceProcessors = processors.ToArray();
 
@@ -408,6 +423,11 @@ namespace Xasu
             if (statement.timestamp == null || !statement.timestamp.HasValue)
             {
                 statement.timestamp = DateTime.UtcNow;
+            }
+
+            if (statement.context == null)
+            {
+                statement.context = DefaultContext;
             }
 
             if (statement.context.registration == null)

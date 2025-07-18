@@ -4,7 +4,7 @@ using TinCan;
 
 namespace Xasu.HighLevel
 {
-    public class AlternativeTracker : AbstractHighLevelTracker<AlternativeTracker>
+    public class AlternativeTracker : AbstractSeriousGameHighLevelTracker<AlternativeTracker>
     {
 
         /**********************
@@ -52,18 +52,6 @@ namespace Xasu.HighLevel
         * *******************/
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
-        protected enum ContextActivity
-        {
-            SeriousGames
-        }
-
-        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
-        {
-            { ContextActivity.SeriousGames, "https://w3id.org/xapi/seriousgames" },
-        };
-
-        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
-
         /**********************
         *     Templates
         * *******************/
@@ -95,7 +83,7 @@ namespace Xasu.HighLevel
                 {
                     response = optionId
                 },
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 
@@ -126,7 +114,7 @@ namespace Xasu.HighLevel
                 {
                     response = optionId
                 },
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 

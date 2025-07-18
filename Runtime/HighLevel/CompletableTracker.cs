@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Xasu.HighLevel
 {
 
-    public class CompletableTracker : AbstractHighLevelTracker<CompletableTracker>
+    public class CompletableTracker : AbstractSeriousGameHighLevelTracker<CompletableTracker>
     {
 
         /**********************
@@ -78,18 +78,6 @@ namespace Xasu.HighLevel
 
         protected override Dictionary<Enum, string> ExtensionIds => extensionIds;
 
-        protected enum ContextActivity
-        {
-            SeriousGames
-        }
-
-        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
-        {
-            { ContextActivity.SeriousGames, "https://w3id.org/xapi/seriousgames" },
-        };
-
-        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
-
         /**********************
             * Static attributes
             * *******************/
@@ -132,7 +120,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Initialized),
                 target = GetTargetActivity(completableId, type),
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 
@@ -163,7 +151,7 @@ namespace Xasu.HighLevel
                 {
                     { Extensions.Progress, value }
                 }),
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 
@@ -242,7 +230,7 @@ namespace Xasu.HighLevel
                 verb = GetVerb(Verb.Completed),
                 target = GetTargetActivity(completableId, type),
                 result = result,
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 

@@ -5,10 +5,8 @@ using TinCan;
 
 namespace Xasu.HighLevel
 {
-    public class AccessibleTracker : AbstractHighLevelTracker<AccessibleTracker>
+    public class AccessibleTracker : AbstractSeriousGameHighLevelTracker<AccessibleTracker>
     {
-
-
         /**********************
         *       Verbs
         * *******************/
@@ -56,18 +54,6 @@ namespace Xasu.HighLevel
 
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
-        protected enum ContextActivity
-        {
-            SeriousGames
-        }
-
-        protected Dictionary<Enum, string> contextIds = new Dictionary<Enum, string>()
-        {
-            { ContextActivity.SeriousGames, "https://w3id.org/xapi/seriousgames" },
-        };
-
-        protected override Dictionary<Enum, string> ContextActivityIds => contextIds;
-
         /// <summary>
         /// Player accessed a reachable.
         /// Type = Accessible 
@@ -89,7 +75,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Accessed),
                 target = GetTargetActivity(reachableId, type),
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 
@@ -114,7 +100,7 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Skipped),
                 target = GetTargetActivity(reachableId, type),
-                context= GetContext(ContextActivity.SeriousGames)
+                context = XasuTracker.Instance.GetDefaultContext()
             });
         }
 

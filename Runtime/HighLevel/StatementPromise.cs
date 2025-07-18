@@ -21,27 +21,104 @@ namespace Xasu.HighLevel
             this.Promise = task;
         }
 
-        public StatementPromise addContextActivityParent(string id, string name, string description, string type) {
-            Activity act = new Activity {
+        public StatementPromise CreateAndAddContextGroupingActivity(string id, string name, string description, Uri type)
+        {
+            Activity act = new Activity
+            {
                 id = id,
-                definition = new ActivityDefinition {
+                definition = new ActivityDefinition
+                {
                     //name = new LanguageMap {
-			    	//    "en-US"= name,
-			        //},
+                    //    "en-US"= name,
+                    //},
                     //description= new LanguageMap  {
-			        //	"en-US"=description,
-			        //},
-                    type = new Uri(type),
+                    //	"en-US"=description,
+                    //},
+                    type = type,
                 }
             };
-            return this.addContextParentActivity(act);
+            return this.AddContextGroupingActivity(act);
         }
 
-        public StatementPromise addContextParentActivity(Activity parentContextActivity) {
+        StatementPromise AddContextGroupingActivity(Activity contextActivity) {
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
             if(Statement.context.contextActivities.grouping == null) {
                 Statement.context.contextActivities.grouping = new List<Activity>();
             }
-            Statement.context.contextActivities.grouping.Add(parentContextActivity);
+            Statement.context.contextActivities.grouping.Add(contextActivity);
+            return this;
+        }
+        
+        StatementPromise AddContextRegistration(Guid registrationId) {
+            if(Statement.context.registration == null) {
+                Statement.context.registration = registrationId;
+            }
+            return this;
+        }
+        
+         public StatementPromise CreateAndAddContextParentActivity(string id, string name, string description, Uri type)
+        {
+            Activity act = new Activity
+            {
+                id = id,
+                definition = new ActivityDefinition
+                {
+                    //name = new LanguageMap {
+                    //    "en-US"= name,
+                    //},
+                    //description= new LanguageMap  {
+                    //	"en-US"=description,
+                    //},
+                    type = type,
+                }
+            };
+            return this.AddContextParentActivity(act);
+        }
+
+        StatementPromise AddContextParentActivity(Activity contextActivity) {
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
+            if(Statement.context.contextActivities.parent == null) {
+                Statement.context.contextActivities.parent = new List<Activity>();
+            }
+            Statement.context.contextActivities.parent.Add(contextActivity);
+            return this;
+        }
+
+        public StatementPromise CreateAndAddContextCategoryProfileActivity(string id)
+        {
+            return this.CreateAndAddContextCategoryActivity(id, new Uri("http://adlnet.gov/expapi/activities/profile"));
+        }
+
+        public StatementPromise CreateAndAddContextCategoryActivity(string id, Uri typeUri = null)
+        {
+            Activity activity = new Activity { id = id };
+            if (typeUri != null)
+            {
+                activity.definition = new ActivityDefinition
+                {
+                    type = typeUri,
+                };
+            }
+            return this.AddContextCategoryActivity(activity);
+        }
+
+        public StatementPromise AddContextCategoryActivity(Activity activity)
+        {
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
+            if (Statement.context.contextActivities.category == null)
+            {
+                Statement.context.contextActivities.category = new List<Activity>();
+            }
+            Statement.context.contextActivities.category.Add(activity);
             return this;
         }
 

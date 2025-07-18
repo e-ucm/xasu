@@ -94,11 +94,16 @@ namespace Xasu.Util
                 statement.result.extensions = new TinCan.Extensions();
             }
 
-            if (statement.context.registration == null)
+            if (statement.context == null)
             {
-                if(XasuTracker.Instance.DefaultContextRegistrationId == null)
+                if(XasuTracker.Instance.DefaultContext != null)
                 {
-                    XasuTracker.Instance.DefaultContextRegistrationId=Guid.NewGuid();
+                    // Workaround to clone the context
+                    statement.context = new Context(new StringOfJSON(XasuTracker.Instance.DefaultContext.ToJSON()));
+                }
+                else
+                {
+                    statement.context = new Context();
                 }
                 statement.context.registration = XasuTracker.Instance.DefaultContextRegistrationId;
             }
