@@ -105,6 +105,7 @@ namespace Xasu.Util
                 {
                     statement.context = new Context();
                 }
+                statement.context.registration = XasuTracker.Instance.DefaultContextRegistrationId;
             }
 
             if (statement.context.extensions == null)

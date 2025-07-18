@@ -5,7 +5,7 @@ using TinCan;
 
 namespace Xasu.HighLevel
 {
-    public class GameObjectTracker : AbstractHighLevelTracker<GameObjectTracker>
+    public class GameObjectTracker : AbstractSeriousGameHighLevelTracker<GameObjectTracker>
     {
         /// <summary>
         /// Types of GameObjects
@@ -47,7 +47,6 @@ namespace Xasu.HighLevel
 
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
-
         /// <summary>
         /// Player interacted with a game object.
         /// Type = GameObject 
@@ -68,7 +67,8 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Interacted),
-                target = GetTargetActivity(gameobjectId, type)
+                target = GetTargetActivity(gameobjectId, type),
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 
@@ -91,7 +91,8 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Used),
-                target = GetTargetActivity(gameobjectId, type)
+                target = GetTargetActivity(gameobjectId, type),
+                context = XasuTracker.Instance.DefaultContext
             });
         }
     }

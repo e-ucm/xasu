@@ -4,7 +4,7 @@ using TinCan;
 
 namespace Xasu.HighLevel
 {
-    public class AlternativeTracker : AbstractHighLevelTracker<AlternativeTracker>
+    public class AlternativeTracker : AbstractSeriousGameHighLevelTracker<AlternativeTracker>
     {
 
         /**********************
@@ -52,7 +52,6 @@ namespace Xasu.HighLevel
         * *******************/
         protected override Dictionary<Enum, string> ExtensionIds => null;
 
-
         /**********************
         *     Templates
         * *******************/
@@ -80,11 +79,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Selected),
                 target = GetTargetActivity(alternativeId, type),
-                result = new Result
-                {
-                    response = optionId
-                }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithResponse(optionId);
         }
 
         /// <summary>
@@ -110,12 +106,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Unlocked),
                 target = GetTargetActivity(alternativeId, type),
-                result = new Result
-                {
-                    response = optionId
-                }
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithResponse(optionId);
         }
-
     }
 }

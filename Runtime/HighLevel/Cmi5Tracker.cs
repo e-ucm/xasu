@@ -78,7 +78,6 @@ namespace Xasu.HighLevel
             };
         protected override Dictionary<Enum, string> ExtensionIds => objectIds;
 
-
         /**********************
             * Static attributes
             * *******************/
@@ -158,13 +157,9 @@ namespace Xasu.HighLevel
                 verb = GetVerb(Verb.Completed),
                 target = id == Cmi5Helper.Activity.id ? Cmi5Helper.Activity : new Activity { id = id },
                 actor = Cmi5Helper.Actor,
-                context = Cmi5Helper.MoveOnContext,
-                result = new Result
-                {
-                    completion = true,
-                    duration = TimeSpan.FromSeconds(durationInSeconds)
-                }
-            });
+                context = Cmi5Helper.MoveOnContext
+            }).WithCompletion(true)
+            .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));
         }
 
         #endregion
@@ -223,14 +218,10 @@ namespace Xasu.HighLevel
                 verb = GetVerb(Verb.Passed),
                 target = id == Cmi5Helper.Activity.id ? Cmi5Helper.Activity : new Activity { id = id },
                 actor = Cmi5Helper.Actor,
-                context = Cmi5Helper.MasteryScoreContext,
-                result = new Result
-                {
-                    success = true,
-                    score = float.IsNaN(score) ? null : new Score { scaled = score },
-                    duration = TimeSpan.FromSeconds(durationInSeconds)
-                }
-            });
+                context = Cmi5Helper.MasteryScoreContext
+            }).WithSuccess(true)
+            .WithScoreScaled(score)
+            .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));
         }
 
         #endregion
@@ -289,14 +280,10 @@ namespace Xasu.HighLevel
                 verb = GetVerb(Verb.Failed),
                 target = id == Cmi5Helper.Activity.id ? Cmi5Helper.Activity : new Activity { id = id },
                 actor = Cmi5Helper.Actor,
-                context = Cmi5Helper.MasteryScoreContext,
-                result = new Result
-                {
-                    success = false,
-                    score = score == float.NaN ? null : new Score { scaled = score },
-                    duration = TimeSpan.FromSeconds(durationInSeconds)
-                }
-            });
+                context = Cmi5Helper.MasteryScoreContext
+            }).WithSuccess(false)
+            .WithScoreScaled(score)
+            .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));
         }
 
         #endregion
@@ -343,12 +330,8 @@ namespace Xasu.HighLevel
                 verb = GetVerb(Verb.Terminated),
                 target = id == Cmi5Helper.Activity.id ? Cmi5Helper.Activity : new Activity { id = id },
                 actor = Cmi5Helper.Actor,
-                context = Cmi5Helper.Cmi5Context,
-                result = new Result
-                {
-                    duration = DateTime.Now - new DateTime(ticks)
-                }
-            });
+                context = Cmi5Helper.Cmi5Context
+            }).WithDuration(new DateTime(ticks),DateTime.Now);
         }
 
         #endregion
