@@ -99,8 +99,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Initialized),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             });
         }
         #endregion
@@ -145,8 +144,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Suspended),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             }).WithDuration(initializedTimes[scoId], suspendedTimes[scoId]);
         }
         #endregion
@@ -179,8 +177,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Resumed),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             });
         }
         #endregion
@@ -197,8 +194,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Progressed),
-                target = GetTargetActivity(id, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(id, type)
             }).WithScoreScaled(value);
         }
         #endregion
@@ -226,8 +222,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Terminated),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             }).WithTimeSpanDuration(duration);
         }
         #endregion
@@ -246,8 +241,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Passed),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             }).WithSuccess(true)
             .WithScoreScaled(score)
             .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));;
@@ -267,8 +261,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Failed),
-                target = GetTargetActivity(scoId, ScormType.SCO),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(scoId, ScormType.SCO)
             }).WithSuccess(false)
             .WithScoreScaled(score)
             .WithTimeSpanDuration(TimeSpan.FromSeconds(durationInSeconds));
@@ -288,8 +281,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Scored),
-                target = GetTargetActivity(id, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(id, type)
             }).WithScoreScaled(value);
         }
         #endregion
