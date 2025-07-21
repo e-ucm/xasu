@@ -78,8 +78,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Selected),
-                target = GetTargetActivity(alternativeId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(alternativeId, type)
             }).WithResponse(optionId);
         }
 
@@ -105,8 +104,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Unlocked),
-                target = GetTargetActivity(alternativeId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(alternativeId, type)
             }).WithResponse(optionId);
         }
     }

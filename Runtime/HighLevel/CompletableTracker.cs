@@ -119,8 +119,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Initialized),
-                target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(completableId, type)
             });
         }
 
@@ -146,8 +145,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Progressed),
-                target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(completableId, type)
             }).WithResultExtension(extensionIds[Extensions.Progress], value);
         }
 
@@ -218,8 +216,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Completed),
-                target = GetTargetActivity(completableId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(completableId, type)
             }).WithCompletion(true)
             .WithTimeSpanDuration(duration);
         }

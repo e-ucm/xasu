@@ -67,8 +67,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Interacted),
-                target = GetTargetActivity(gameobjectId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(gameobjectId, type)
             });
         }
 
@@ -91,8 +90,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Used),
-                target = GetTargetActivity(gameobjectId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(gameobjectId, type)
             });
         }
     }
