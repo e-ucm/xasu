@@ -20,7 +20,7 @@ namespace Xasu.Requests
         {
             bool isSimvaStatements = false;
             // Simva Special cases
-            if (XasuTracker.Instance.TrackerConfig.Simva)
+            if (XasuTracker.Instance && XasuTracker.Instance.TrackerConfig != null && XasuTracker.Instance.TrackerConfig.Simva)
             {
                 if(Application.platform == RuntimePlatform.WebGLPlayer)
                 {
