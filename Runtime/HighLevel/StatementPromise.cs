@@ -21,14 +21,140 @@ namespace Xasu.HighLevel
             this.Promise = task;
         }
 
+        public StatementPromise CreateAndAddContextGroupingActivity(string id, string name, string description, string type)
+        {
+            Activity act = new Activity
+            {
+                id = id,
+                definition = new ActivityDefinition
+                {
+                    //name = new LanguageMap {
+                    //    "en-US"= name,
+                    //},
+                    //description= new LanguageMap  {
+                    //	"en-US"=description,
+                    //},
+                    type = new Uri(type),
+                }
+            };
+            return this.AddContextGroupingActivity(act);
+        }
+
+        StatementPromise AddContextGroupingActivity(Activity contextActivity) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
+            if(Statement.context.contextActivities.grouping == null) {
+                Statement.context.contextActivities.grouping = new List<Activity>();
+            }
+            Statement.context.contextActivities.grouping.Add(contextActivity);
+            return this;
+        }
+        
+        StatementPromise AddContextRegistration(Guid registrationId) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
+            if (Statement.context.registration == null)
+            {
+                Statement.context.registration = registrationId;
+            }
+            return this;
+        }
+        
+         public StatementPromise CreateAndAddContextParentActivity(string id, string name, string description, string type)
+        {
+            Activity act = new Activity
+            {
+                id = id,
+                definition = new ActivityDefinition
+                {
+                    //name = new LanguageMap {
+                    //    "en-US"= name,
+                    //},
+                    //description= new LanguageMap  {
+                    //	"en-US"=description,
+                    //},
+                    type = new Uri(type),
+                }
+            };
+            return this.AddContextParentActivity(act);
+        }
+
+        StatementPromise AddContextParentActivity(Activity contextActivity) {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
+            if(Statement.context.contextActivities.parent == null) {
+                Statement.context.contextActivities.parent = new List<Activity>();
+            }
+            Statement.context.contextActivities.parent.Add(contextActivity);
+            return this;
+        }
+
+        public StatementPromise CreateAndAddContextCategoryProfileActivity(string id)
+        {
+            return this.CreateAndAddContextCategoryActivity(id, "http://adlnet.gov/expapi/activities/profile");
+        }
+
+        public StatementPromise CreateAndAddContextCategoryActivity(string id, string typeUri = null)
+        {
+            Activity activity = new Activity { id = id };
+            if (typeUri != null)
+            {
+                activity.definition = new ActivityDefinition
+                {
+                    type = new Uri(typeUri),
+                };
+            }
+            return this.AddContextCategoryActivity(activity);
+        }
+
+        public StatementPromise AddContextCategoryActivity(Activity activity)
+        {
+            if (Statement.context== null)
+            {
+                Statement.context = new Context();
+            }
+            if (Statement.context.contextActivities == null)
+            {
+                Statement.context.contextActivities = new ContextActivities();
+            }
+            if (Statement.context.contextActivities.category == null)
+            {
+                Statement.context.contextActivities.category = new List<Activity>();
+            }
+            Statement.context.contextActivities.category.Add(activity);
+            return this;
+        }
+
         public StatementPromise WithSuccess(bool success)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.success = success;
             return this;
         }
 
         public StatementPromise WithScore(Dictionary<string, double> scores)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -50,6 +176,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreRaw(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -60,6 +190,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreMin(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -70,6 +204,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreMax(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -80,6 +218,10 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithScoreScaled(double score)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             if (Statement.result.score == null)
             {
                 Statement.result.score = new Score();
@@ -90,25 +232,51 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithCompletion(bool completion)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.completion = completion;
             return this;
         }
 
         public StatementPromise WithDuration(DateTime init, DateTime end)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             TimeSpan duration = end - init;
+            Statement.result.duration = duration;
+            return this;
+        }
+
+        public StatementPromise WithTimeSpanDuration(TimeSpan duration)
+        {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.duration = duration;
             return this;
         }
 
         public StatementPromise WithResponse(string response)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.response = response;
             return this;
         }
 
         public StatementPromise WithResultExtension(string key, object value)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Dictionary<string, object> extensions = new Dictionary<string, object>();
             extensions.Add(key, value);
             Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
@@ -117,14 +285,33 @@ namespace Xasu.HighLevel
 
         public StatementPromise WithResultExtensions(Dictionary<string, object> extensions)
         {
+            if (Statement.result== null)
+            {
+                Statement.result = new Result();
+            }
             Statement.result.extensions = AddExtensions(Statement.result.extensions, extensions);
             return this;
         }
 
-        
+        public StatementPromise WithContextExtension(string key, object value)
+        {
+            if (Statement.result== null)
+            {
+                Statement.context = new Context();
+            }
+            Dictionary<string, object> extensions = new Dictionary<string, object>();
+            extensions.Add(key, value);
+            Statement.result.extensions = AddExtensions(Statement.context.extensions, extensions);
+            return this;
+        }
+
         public StatementPromise WithContextExtensions(Dictionary<string, object> extensions)
         {
-            Statement.context.extensions = AddExtensions(Statement.result.extensions, extensions);
+            if (Statement.context == null)
+            {
+                Statement.context = new Context();
+            }
+            Statement.context.extensions = AddExtensions(Statement.context.extensions, extensions);
             return this;
         }
 

@@ -11,6 +11,7 @@ using Xasu.Config;
 using Xasu.Auth.Protocols;
 using Xasu.Exceptions;
 using TinCan;
+using TinCan.Json;
 using UnityEngine;
 using Xasu.Requests;
 
@@ -39,7 +40,14 @@ namespace Xasu
         public Agent DefaultActor { get; set; }
         private string username = null;
         private string email = null;
-        public Context DefaultContext { get; set; }
+        private Context defaultContext;
+        public Context DefaultContext
+        {
+            get { return new Context(new StringOfJSON(defaultContext.ToJSON())); }  // your json copy 
+            set { defaultContext = new Context(new StringOfJSON(value.ToJSON())); }
+        }
+
+        public Guid DefaultContextRegistrationId { get; set; }
         public string DefaultIdPrefix { get; set; }
 
         protected override void Awake()
@@ -92,8 +100,9 @@ namespace Xasu
 
         public async Task Init(TrackerConfig trackerConfig,  IHttpRequestHandler requestHandler, IAuthProtocol onlineAuthorization = null, IAuthProtocol backupAuthorization = null, bool EnableLogs=false)
         {
-            if(!EnableLogs == false) {
-                EnableDebugLogging=EnableLogs;
+            if (!EnableLogs == false)
+            {
+                EnableDebugLogging = EnableLogs;
             }
             try
             {
@@ -149,7 +158,7 @@ namespace Xasu
                     await onlineProcessor.Init();
                     processors.Add(onlineProcessor);
                 }
-                
+
                 if (TrackerConfig.Backup)
                 {
                     if (backupAuthorization != null)
@@ -178,15 +187,17 @@ namespace Xasu
                 }
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
+                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
 
-                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = "Dummy User", mbox = "dummy@user.com" };
-
-                Activity sg = new Activity { id = "https://w3id.org/xapi/seriousgames" };
-
-                List<Activity> list = new List<Activity>();
-                list.Add(sg);
-                DefaultContext = new Context { registration = Guid.NewGuid(), contextActivities = new ContextActivities { category = list } };
-
+                if (defaultContext == null)
+                {
+                    defaultContext = new Context { };
+                }
+                if (DefaultContextRegistrationId == null)
+                {
+                    DefaultContextRegistrationId = Guid.NewGuid();
+                }
+                LogWarning("[TRACKER] " + DefaultContextRegistrationId);
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
@@ -418,6 +429,11 @@ namespace Xasu
             if (statement.context == null)
             {
                 statement.context = DefaultContext;
+            }
+
+            if (statement.context.registration == null)
+            {
+                statement.context.registration = DefaultContextRegistrationId;
             }
         }
 

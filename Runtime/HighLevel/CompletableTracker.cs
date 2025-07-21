@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Xasu.HighLevel
 {
 
-    public class CompletableTracker : AbstractHighLevelTracker<CompletableTracker>
+    public class CompletableTracker : AbstractSeriousGameHighLevelTracker<CompletableTracker>
     {
 
         /**********************
@@ -119,7 +119,8 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Initialized),
-                target = GetTargetActivity(completableId, type)
+                target = GetTargetActivity(completableId, type),
+                context = XasuTracker.Instance.DefaultContext
             });
         }
 
@@ -146,11 +147,8 @@ namespace Xasu.HighLevel
             {
                 verb = GetVerb(Verb.Progressed),
                 target = GetTargetActivity(completableId, type),
-                result = SetResultExtensions(new Result(), new Dictionary<Enum, object>
-                {
-                    { Extensions.Progress, value }
-                })
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithResultExtension(extensionIds[Extensions.Progress], value);
         }
 
         /// <summary>
@@ -217,19 +215,13 @@ namespace Xasu.HighLevel
                 initializedTimes.Remove(completableId);
             }
 
-            var result = new Result{ completion = true };
-            if (!hasDuration || durationInSeconds > 0f)
-            {
-                result.duration = duration;
-            }
-
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Completed),
                 target = GetTargetActivity(completableId, type),
-                result = result
-            });
+                context = XasuTracker.Instance.DefaultContext
+            }).WithCompletion(true)
+            .WithTimeSpanDuration(duration);
         }
-
     }
 }
