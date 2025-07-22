@@ -38,8 +38,10 @@ namespace Xasu
         public IAsyncLRS LRS { get; set; }
         public TrackerConfig TrackerConfig { get; private set; }
         public Agent DefaultActor { get; set; }
-        private string username = null;
-        private string email = null;
+        private string username = "Dummy User";
+        private string email = "dummy@example.com";
+        private string homePage = "https://example.com/";
+        private bool useOfflineAccountInsteadOfEmail;
         private Context defaultContext;
         public Context DefaultContext
         {
@@ -94,17 +96,35 @@ namespace Xasu
         }
 
 #if UNITY_5_3_OR_NEWER
-        public async Task InitOffline(string username=null, string email=null)
+        public async Task InitOffline(string username, string email)
         {
             TrackerConfig trackerConfig = await TrackerConfigLoader.LoadLocalAsync();
             if (trackerConfig.Offline)
             {
                 this.username = username;
                 this.email = email;
+                this.useOfflineAccountInsteadOfEmail=false;
             }
             else
             {
                 LogWarning("[TRACKER] Don't use InitOffline() function when using only Online or/and Backup when not AutoStart. Prefer using Init() function.");
+            }
+            // Init with local file config
+            await Init(trackerConfig, new UnityRequestHandler());
+        }
+
+        public async Task InitOfflineWithAccount(string username, string homePage)
+        {
+            TrackerConfig trackerConfig = await TrackerConfigLoader.LoadLocalAsync();
+            if (trackerConfig.Offline)
+            {
+                this.username = username;
+                this.homePage = homePage;
+                this.useOfflineAccountInsteadOfEmail=true;
+            }
+            else
+            {
+                LogWarning("[TRACKER] Don't use InitOfflineWithAccount() function when using only Online or/and Backup when not AutoStart. Prefer using Init() function.");
             }
             // Init with local file config
             await Init(trackerConfig, new UnityRequestHandler());
@@ -205,8 +225,30 @@ namespace Xasu
                     processors.Add(backupProcessor);
                 }
 
-                // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
-                DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
+                if (onlineAuthProtocol != null) {
+                    // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
+                    DefaultActor = onlineAuthProtocol.Agent;
+                } else {
+                    if (useOfflineAccountInsteadOfEmail)
+                    {
+                        DefaultActor = new Agent
+                        {
+                            account = new AgentAccount
+                            {
+                                homePage = homePage,
+                                name = username
+                            }
+                        };
+                    }
+                    else
+                    {
+                        DefaultActor = new Agent
+                        {
+                            name = username,
+                            mbox = email
+                        };   
+                    }
+                }
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
