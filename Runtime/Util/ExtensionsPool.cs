@@ -97,7 +97,7 @@ namespace Xasu.Util
             if (statement.context == null)
             {
                 statement.context = XasuTracker.Instance.DefaultContext;
-                }
+            }
             if (statement.context.registration == null)
             {
                 statement.context.registration = XasuTracker.Instance.DefaultContextRegistrationId;
