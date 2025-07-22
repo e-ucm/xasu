@@ -96,15 +96,10 @@ namespace Xasu.Util
 
             if (statement.context == null)
             {
-                if(XasuTracker.Instance.DefaultContext != null)
-                {
-                    // Workaround to clone the context
-                    statement.context = new Context(new StringOfJSON(XasuTracker.Instance.DefaultContext.ToJSON()));
-                }
-                else
-                {
-                    statement.context = new Context();
-                }
+                statement.context = XasuTracker.Instance.DefaultContext;
+            }
+            if (statement.context.registration == null)
+            {
                 statement.context.registration = XasuTracker.Instance.DefaultContextRegistrationId;
             }
 

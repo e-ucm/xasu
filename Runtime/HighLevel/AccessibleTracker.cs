@@ -74,8 +74,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Accessed),
-                target = GetTargetActivity(reachableId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(reachableId, type)
             });
         }
 
@@ -99,8 +98,7 @@ namespace Xasu.HighLevel
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Skipped),
-                target = GetTargetActivity(reachableId, type),
-                context = XasuTracker.Instance.DefaultContext
+                target = GetTargetActivity(reachableId, type)
             });
         }
 

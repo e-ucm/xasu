@@ -68,6 +68,7 @@ namespace Xasu.Processors
 
             // Setup the context
             XasuTracker.Instance.DefaultContext = Cmi5Helper.Cmi5Allowed;
+            XasuTracker.Instance.DefaultContextRegistrationId = (Guid)Cmi5Helper.Cmi5Context.registration;
 
             State = ProcessorState.Working;
             // Send initialized statement
