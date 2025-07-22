@@ -43,11 +43,30 @@ namespace Xasu
         private Context defaultContext;
         public Context DefaultContext
         {
-            get { return new Context(new StringOfJSON(defaultContext.ToJSON())); }  // your json copy 
+            get
+            {
+                if (defaultContext == null)
+                {
+                    defaultContext = new Context();
+                }
+                return new Context(new StringOfJSON(defaultContext.ToJSON()));
+            }  // your json copy 
             set { defaultContext = new Context(new StringOfJSON(value.ToJSON())); }
         }
 
-        public Guid DefaultContextRegistrationId { get; set; }
+        private Guid defaultContextRegistrationId;
+        public Guid DefaultContextRegistrationId {
+            get
+            {
+                if (defaultContextRegistrationId == Guid.Empty)
+                {
+                    defaultContextRegistrationId = Guid.NewGuid();
+                    Log("Registration Id : " + defaultContextRegistrationId);
+                }
+                return defaultContextRegistrationId;
+            }
+            set { defaultContextRegistrationId = value; }
+        }
         public string DefaultIdPrefix { get; set; }
 
         protected override void Awake()
@@ -188,16 +207,6 @@ namespace Xasu
 
                 // Actor is obtained from authorization (e.g. OAuth contains username, CMI-5 obtains agent)
                 DefaultActor = onlineAuthProtocol != null ? onlineAuthProtocol.Agent : new Agent { name = (username == null) ? "Dummy User" : username, mbox = (email == null) ? "dummy@user.com" : email };
-
-                if (defaultContext == null)
-                {
-                    defaultContext = new Context { };
-                }
-                if (DefaultContextRegistrationId == null)
-                {
-                    DefaultContextRegistrationId = Guid.NewGuid();
-                }
-                LogWarning("[TRACKER] " + DefaultContextRegistrationId);
                 traceProcessors = processors.ToArray();
 
                 Status.Monitor(onlineProcessor, localProcessor, backupProcessor, onlineAuthProtocol, backupAuthProtocol);
@@ -424,16 +433,6 @@ namespace Xasu
             if (statement.timestamp == null || !statement.timestamp.HasValue)
             {
                 statement.timestamp = DateTime.UtcNow;
-            }
-
-            if (statement.context == null)
-            {
-                statement.context = DefaultContext;
-            }
-
-            if (statement.context.registration == null)
-            {
-                statement.context.registration = DefaultContextRegistrationId;
             }
         }
 
