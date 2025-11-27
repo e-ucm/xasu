@@ -112,7 +112,7 @@ public class InstallerCreatorPostProcessor : IPreprocessBuildWithReport
             return false;
         }
         // If we are not building for cmi5 we just dont care
-        if (trackerConfig.AuthProtocol.Equals("cmi5", System.StringComparison.InvariantCultureIgnoreCase))
+        if (trackerConfig != null && !String.IsNullOrEmpty(trackerConfig.AuthProtocol) && trackerConfig.AuthProtocol.Equals("cmi5", System.StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;
