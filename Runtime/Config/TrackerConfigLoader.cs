@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Xasu.Requests;
+using Xasu.Util;
 
 namespace Xasu.Config
 {
@@ -13,6 +14,19 @@ namespace Xasu.Config
 
         public static async Task<TrackerConfig> LoadLocalAsync()
         {
+
+#if UNITY_WEBGL
+            if(XasuTracker.Instance.CanLoadConfigFromURL)
+            {
+                var trackerConfig = WebGLUtility.GetUrlTrackerConfig();
+                if (trackerConfig != null)
+                {
+                    XasuTracker.Instance.Log("[TRACKER CONFIG] Loaded tracker_config from URL parameters.");
+                    return trackerConfig;
+                }
+            }
+#endif
+
             return await LoadAsync(TrackerConfigFileName);
         }
 

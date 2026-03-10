@@ -22,6 +22,7 @@ namespace Xasu
         private IHttpRequestHandler requestHandler;
         public bool AutoStart = false;
         public bool EnableDebugLogging = false;
+        public bool CanLoadConfigFromURL = true;
 
         public float processingLoopTime = 1; // In Seconds
 
