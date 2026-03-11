@@ -94,10 +94,10 @@ namespace Xasu.Util
 
             // Batch Parsing
             string batchLengthParam = GetParameter("batch_length");
-            string batchTimeoutParam = ParseToSeconds(GetParameter("batch_timeout"));
-            string maxRetryDelayParam = ParseToSeconds(GetParameter("max_retry_delay"));
-
             if (int.TryParse(batchLengthParam, out int bl)) batchLength = bl;
+
+            batchTimeout = ParseToSeconds(GetParameter("batch_timeout"));
+            maxRetryDelay = ParseToSeconds(GetParameter("max_retry_delay"));
 
             debug = "true".Equals(GetParameter("debug"), StringComparison.InvariantCultureIgnoreCase);
 
