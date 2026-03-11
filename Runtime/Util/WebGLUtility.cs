@@ -67,8 +67,8 @@ namespace Xasu.Util
             string actorHomePage = null;
             bool debug = false;
             int? batchLength = null;
-            double? batchTimeout = null; // Assuming ms returns a long
-            double? maxRetryDelay = null;
+            float? batchTimeout = null; // Assuming ms returns a long
+            float? maxRetryDelay = null;
 
             // SSO / Auth variables
             string ssoTokenEndpoint = GetParameter("sso_token_endpoint");
@@ -177,7 +177,7 @@ namespace Xasu.Util
         /// <summary>
         /// Parses a string duration (e.g., "5min", "2.5s", "500ms") into seconds as a double.
         /// </summary>
-        private static double? ParseToSeconds(string input)
+        private static float? ParseToSeconds(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return null;
     
@@ -188,19 +188,19 @@ namespace Xasu.Util
             if (!match.Success) return null;
     
             // Use CultureInfo.InvariantCulture to ensure '.' is treated as a decimal separator
-            if (!double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
+            if (!float.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out float value))
                 return null;
     
             string unit = match.Groups[2].Value.ToLower();
     
             return unit switch
             {
-                "ms"         => value / 1000.0,
+                "ms"         => value / 1000.0f,
                 "s"          => value,
-                "m" or "min" => value * 60.0,
-                "h"          => value * 3600.0,
-                "d"          => value * 86400.0,
-                "w"          => value * 604800.0,
+                "m" or "min" => value * 60.0f,
+                "h"          => value * 3600.0f,
+                "d"          => value * 86400.0f,
+                "w"          => value * 604800.0f,
                 _            => value // Default to seconds if no unit provided
             };
         }
