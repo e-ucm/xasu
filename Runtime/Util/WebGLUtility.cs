@@ -67,8 +67,8 @@ namespace Xasu.Util
             string actorHomePage = null;
             bool debug = false;
             int? batchLength = null;
-            long? batchTimeout = null; // Assuming ms returns a long
-            long? maxRetryDelay = null;
+            double? batchTimeout = null; // Assuming ms returns a long
+            double? maxRetryDelay = null;
 
             // SSO / Auth variables
             string ssoTokenEndpoint = GetParameter("sso_token_endpoint");
