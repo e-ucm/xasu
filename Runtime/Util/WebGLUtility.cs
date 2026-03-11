@@ -54,7 +54,8 @@ namespace Xasu.Util
 
         public static TrackerConfig GetUrlTrackerConfig()
         {
-            if(!GetCompleteUrl().Contains("?"))
+            XasuTracker.Instance.Log("Parsing tracker configuration from URL("+GetCompleteUrl()+") parameters...");
+            if (!GetCompleteUrl().Contains("?"))
             {
                 return null;
             }
@@ -109,6 +110,7 @@ namespace Xasu.Util
 
             if (!string.IsNullOrEmpty(ssoTokenEndpoint))
             {
+                XasuTracker.Instance.Log("SSO configuration detected in URL parameters. Setting up OAuth2 authentication.\n" + ssoTokenEndpoint);
                 trackerConfig.AuthProtocol = "oauth2";
                 if (ssoGrantType == "password")
                 {
@@ -126,6 +128,7 @@ namespace Xasu.Util
             }
             else if (!string.IsNullOrEmpty(ssoUsername))
             {
+                XasuTracker.Instance.Log(username + " detected in URL parameters. Setting up basic authentication with provided username and password.");
                 trackerConfig.Online = true;
                 trackerConfig.AuthProtocol = "basic";
                 trackerConfig.AuthParameters = new Dictionary<string, string>
@@ -141,11 +144,13 @@ namespace Xasu.Util
 
             if (!string.IsNullOrEmpty(resultUri))
             {
+                XasuTracker.Instance.Log("Setting result endpoint from URL parameters: " + resultUri);
                 trackerConfig.Online = true;
                 trackerConfig.LRSEndpoint = resultUri;
             }
             if (!string.IsNullOrEmpty(backupUri))
             {
+                XasuTracker.Instance.Log("Setting backup endpoint from URL parameters: " + backupUri + " with type " + backupType);
                 trackerConfig.Backup = true;
                 trackerConfig.BackupEndpoint = backupUri;
                 trackerConfig.BackupAuthProtocol = "same";
@@ -166,7 +171,7 @@ namespace Xasu.Util
 
             if(trackerConfig.Online == false && trackerConfig.Backup == false)
             {
-                Debug.Log("Tracker configuration from URL is invalid: No result_uri or backup_uri provided.");
+                XasuTracker.Instance.Log("Tracker configuration from URL is invalid: No result_uri or backup_uri provided.");
                 return null;
             }
 
