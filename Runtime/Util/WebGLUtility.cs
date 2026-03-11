@@ -144,6 +144,11 @@ namespace Xasu.Util
 
             if (!string.IsNullOrEmpty(resultUri))
             {
+                if(resultUri.Contains("simva"))
+                {
+                    XasuTracker.Instance.Log("Simva configuration detected in URL parameters. Setting up Simva behavior as true.");
+                    trackerConfig.Simva = true;
+                }
                 XasuTracker.Instance.Log("Setting result endpoint from URL parameters: " + resultUri);
                 trackerConfig.Online = true;
                 trackerConfig.LRSEndpoint = resultUri;
