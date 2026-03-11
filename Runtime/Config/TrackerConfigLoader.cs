@@ -15,7 +15,7 @@ namespace Xasu.Config
         public static async Task<TrackerConfig> LoadLocalAsync()
         {
 
-#if UNITY_WEBGL
+#if !UNITY_EDITOR && UNITY_WEBGL
             if(XasuTracker.Instance.CanLoadConfigFromURL)
             {
                 var trackerConfig = WebGLUtility.GetUrlTrackerConfig();
