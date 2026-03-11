@@ -94,12 +94,10 @@ namespace Xasu.Util
 
             // Batch Parsing
             string batchLengthParam = GetParameter("batch_length");
-            string batchTimeoutParam = GetParameter("batch_timeout");
-            string maxRetryDelayParam = GetParameter("max_retry_delay");
+            string batchTimeoutParam = ParseToSeconds(GetParameter("batch_timeout"));
+            string maxRetryDelayParam = ParseToSeconds(GetParameter("max_retry_delay"));
 
             if (int.TryParse(batchLengthParam, out int bl)) batchLength = bl;
-            if (long.TryParse(batchTimeoutParam, out long bt)) batchTimeout = bt; // You may need a custom MS parser
-            if (long.TryParse(maxRetryDelayParam, out long mrd)) maxRetryDelay = mrd;
 
             debug = "true".Equals(GetParameter("debug"), StringComparison.InvariantCultureIgnoreCase);
 
@@ -173,6 +171,37 @@ namespace Xasu.Util
 
             return trackerConfig;
 
+        }
+
+        /// <summary>
+        /// Parses a string duration (e.g., "5min", "2.5s", "500ms") into seconds as a double.
+        /// </summary>
+        private static double? ParseToSeconds(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return null;
+    
+            // Regex: Matches (digits or decimals) followed by (optional unit)
+            // Uses NumberStyles.Any to allow decimal points
+            var match = Regex.Match(input.Trim(), @"^([\d\.]+)(ms|s|m|min|h|d|w)?$", RegexOptions.IgnoreCase);
+    
+            if (!match.Success) return null;
+    
+            // Use CultureInfo.InvariantCulture to ensure '.' is treated as a decimal separator
+            if (!double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
+                return null;
+    
+            string unit = match.Groups[2].Value.ToLower();
+    
+            return unit switch
+            {
+                "ms"         => value / 1000.0,
+                "s"          => value,
+                "m" or "min" => value * 60.0,
+                "h"          => value * 3600.0,
+                "d"          => value * 86400.0,
+                "w"          => value * 604800.0,
+                _            => value // Default to seconds if no unit provided
+            };
         }
     }
 }
