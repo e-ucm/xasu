@@ -1,7 +1,7 @@
 mergeInto(LibraryManager.library, {
 
   OpenUrl: function (str) {
-    window.open(Pointer_stringify(str), "_self");
+    window.open(UTF8ToString(str), "_self");
   },
 
   ClearUrl: function () {
@@ -26,7 +26,7 @@ mergeInto(LibraryManager.library, {
  
     GetParameter: function(paramId) {
         var urlParams = new URLSearchParams(location.search);
-        var param = urlParams.get(Pointer_stringify(paramId));
+        var param = urlParams.get(UTF8ToString(paramId));
         console.log("JavaScript read param: " + param);
         if (param == null) {
             return "";
