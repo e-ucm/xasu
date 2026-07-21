@@ -313,33 +313,75 @@ namespace Xasu
             var jarray = new JArray();
             foreach (Statement st in statements)
             {
-                jarray.Add(st.ToJObject(version));
+                var jObject = st.ToJObject(version);
+                StripEmptyResult(jObject);
+                jarray.Add(jObject);
             }
             req.content = Encoding.UTF8.GetBytes(jarray.ToString());
 
             var res = await MakeAsyncRequest(req);
-            if (res.status != (int)HttpStatusCode.OK && res.status != (int)HttpStatusCode.NoContent)
-            {
-                r.success = false;
-                r.httpException = res.ex;
-                r.SetErrMsgFromBytes(res.content);
-                return r;
-            }
 
-            if(res.status == (int)HttpStatusCode.OK)
+            if (res.status >= 200 && res.status < 300)
             {
-                var ids = JArray.Parse(Encoding.UTF8.GetString(res.content));
-                for (int i = 0; i < ids.Count; i++)
+                try
                 {
-                    statements[i].id = new Guid((String)ids[i]);
+                    if (res.status != (int)HttpStatusCode.NoContent && res.content != null && res.content.Length > 0)
+                    {
+                        var body = Encoding.UTF8.GetString(res.content);
+                        JArray ids;
+
+                        if (body.TrimStart().StartsWith("["))
+                        {
+                            ids = JArray.Parse(body);
+                        }
+                        else
+                        {
+                            var obj = JObject.Parse(body);
+                            var dataProp = obj.Property("data") ?? obj.Property("statementIds") ?? obj.Property("ids") ?? obj.Property("result");
+                            ids = dataProp?.Value as JArray;
+                            if (ids == null)
+                            {
+                                r.success = false;
+                                r.SetErrMsgFromBytes(res.content);
+                                return r;
+                            }
+                        }
+
+                        for (int i = 0; i < ids.Count; i++)
+                        {
+                            statements[i].id = new Guid((String)ids[i]);
+                        }
+                        r.content = new StatementsResult(statements);
+                    }
+
+                    r.success = true;
+                    return r;
                 }
-                r.content = new StatementsResult(statements);
+                catch (Exception ex)
+                {
+                    r.success = false;
+                    r.httpException = ex;
+                    r.SetErrMsgFromBytes(res.content);
+                    return r;
+                }
             }
 
-            r.success = true;
-
+            r.success = false;
+            r.httpException = res.ex;
+            r.SetErrMsgFromBytes(res.content);
             return r;
         }
+        private static void StripEmptyResult(JObject jObject)
+        {
+            if (jObject["result"] is JObject resultObj
+                && resultObj.Count == 1
+                && resultObj["extensions"] is JObject extObj
+                && !extObj.HasValues)
+            {
+                jObject.Remove("result");
+            }
+        }
+
         public async Task<StatementLRSResponse> RetrieveStatement(Guid id)
         {
             var queryParams = new Dictionary<String, String>

@@ -75,26 +75,55 @@ namespace Xasu.Requests
                     webResult = await DoRequest(myRequest.ToWebRequest());
                 }
 
-                var responseData = webResult.downloadHandler.data;
-
-                if (isSimvaStatements)
-                {
-                    var jArray = JArray.Parse(Encoding.UTF8.GetString(myRequest.content));
-                    var idsArray = new JArray();
-                    foreach(JObject state in jArray)
-                    {
-                        idsArray.Add(state.GetValue("id").ToString());
-                    }
-                    responseData = Encoding.UTF8.GetBytes(idsArray.ToString());
-                }
-
+                var responseCode = (int)webResult.responseCode;
                 result = new MyHttpResponse()
                 {
-                    status = (int)webResult.responseCode,
-                    content = responseData,
+                    status = responseCode,
+                    content = webResult.downloadHandler.data,
                     contentType = webResult.GetResponseHeader("Content-Type"),
                     etag = webResult.GetRequestHeader("Etag")
                 };
+
+                if (isSimvaStatements && responseCode >= 200 && responseCode < 300)
+                {
+                    var responseBody = webResult.downloadHandler?.data;
+                    JArray idsArray = null;
+
+                    if (responseBody != null && responseBody.Length > 0)
+                    {
+                        var bodyStr = Encoding.UTF8.GetString(responseBody).TrimStart();
+                        if (bodyStr.StartsWith("["))
+                        {
+                            idsArray = JArray.Parse(bodyStr);
+                        }
+                        else
+                        {
+                            var obj = JObject.Parse(bodyStr);
+                            var dataProp = obj.Property("data") ?? obj.Property("statementIds") ?? obj.Property("ids") ?? obj.Property("result");
+                            idsArray = dataProp?.Value as JArray;
+                        }
+                    }
+
+                    if (idsArray == null)
+                    {
+                        var requestArray = JArray.Parse(Encoding.UTF8.GetString(myRequest.content));
+                        idsArray = new JArray();
+                        foreach (JObject state in requestArray)
+                        {
+                            var idToken = state.GetValue("id");
+                            if (idToken != null)
+                            {
+                                idsArray.Add(idToken.ToString());
+                            }
+                            else
+                            {
+                                idsArray.Add(Guid.NewGuid().ToString());
+                            }
+                        }
+                    }
+
+                    result.content = Encoding.UTF8.GetBytes(idsArray.ToString());
+                }
             }
             catch (APIException ex)
             {

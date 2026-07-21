@@ -46,7 +46,7 @@ namespace Xasu.Processors
 
             if (!string.IsNullOrEmpty(backupEndpoint))
             {
-                var backupContents = System.IO.File.ReadAllText(file);
+                var backupContents = CleanBackupContents(System.IO.File.ReadAllText(file));
                 var body = new Dictionary<string, object>
                 {
                     { "tofile", true },
@@ -129,6 +129,42 @@ namespace Xasu.Processors
             else if (progress != null)
             {
                 progress.Report(1);
+            }
+        }
+
+        private static string CleanBackupContents(string backupContents)
+        {
+            if (string.IsNullOrEmpty(backupContents))
+            {
+                return backupContents;
+            }
+
+            var lines = backupContents.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var cleaned = new System.Text.StringBuilder();
+            foreach (var line in lines)
+            {
+                try
+                {
+                    var jObject = JObject.Parse(line);
+                    StripEmptyResult(jObject);
+                    cleaned.AppendLine(jObject.ToString(Newtonsoft.Json.Formatting.None));
+                }
+                catch
+                {
+                    cleaned.AppendLine(line);
+                }
+            }
+            return cleaned.ToString();
+        }
+
+        private static void StripEmptyResult(JObject jObject)
+        {
+            if (jObject["result"] is JObject resultObj
+                && resultObj.Count == 1
+                && resultObj["extensions"] is JObject extObj
+                && !extObj.HasValues)
+            {
+                jObject.Remove("result");
             }
         }
     }

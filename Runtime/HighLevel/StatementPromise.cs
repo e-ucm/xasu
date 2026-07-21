@@ -317,7 +317,7 @@ namespace Xasu.HighLevel
 
         private Extensions AddExtensions(Extensions traceExtensions, Dictionary<string, object> extensions)
         {
-            var jObject = traceExtensions.ToJObject(TinCan.TCAPIVersion.V103);
+            var jObject = traceExtensions?.ToJObject(TinCan.TCAPIVersion.V103) ?? new Newtonsoft.Json.Linq.JObject();
             foreach (var stateExtension in extensions)
             {
                 ExtensionUtil.AddExtensionToJObject(stateExtension, jObject);

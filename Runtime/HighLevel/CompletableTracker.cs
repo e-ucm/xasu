@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xasu.Exceptions;
 using TinCan;
 using UnityEngine;
@@ -100,22 +101,18 @@ namespace Xasu.HighLevel
         /// <param name="type">Completable type.</param>
         public StatementPromise Initialized(string completableId, CompletableType type)
         {
-            bool addInitializedTime = true;
             if (initializedTimes.ContainsKey(completableId))
             {
                 if (XasuTracker.Instance.TrackerConfig.StrictMode)
                 {
                     throw new XApiException("The initialized statement for the specified id has already been sent!");
                 }
-                else
-                {
-                    XasuTracker.Instance.LogWarning("The initialized statement for the specified id has already been sent!");
-                    addInitializedTime = false;
-                }
+
+                XasuTracker.Instance.LogWarning("The initialized statement for the specified id has already been sent! Ignoring duplicate.");
+                return new StatementPromise(new Statement(), Task.FromResult<Statement>(null));
             }
 
-            if(addInitializedTime)
-                initializedTimes.Add(completableId, DateTime.Now);
+            initializedTimes.Add(completableId, DateTime.Now);
             return Enqueue(new Statement
             {
                 verb = GetVerb(Verb.Initialized),

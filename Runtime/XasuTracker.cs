@@ -34,7 +34,7 @@ namespace Xasu
         private IProcessor[] traceProcessors;
         private TrackerStatus trackerStatus;
 
-        private string errorLogFilename;
+        private string errorLogFilename = null;
 
         public IAsyncLRS LRS { get; set; }
         public TrackerConfig TrackerConfig { get; private set; }
@@ -530,14 +530,17 @@ namespace Xasu
             }
 
             // Output internal file log
-            if (!File.Exists(errorLogFilename))
+            if (!string.IsNullOrEmpty(errorLogFilename))
             {
-                // Simplified disposal
-                using (var _ = File.Create(errorLogFilename)) { }
-            }
+                if (!File.Exists(errorLogFilename))
+                {
+                    // Simplified disposal
+                    using (var _ = File.Create(errorLogFilename)) { }
+                }
 
-            var appendLines = ex != null ? new string[] { error, ex.ToString() } : new string[] { error };
-            File.AppendAllLines(errorLogFilename, appendLines);
+                var appendLines = ex != null ? new string[] { error, ex.ToString() } : new string[] { error };
+                File.AppendAllLines(errorLogFilename, appendLines);
+            }
         }
 
         internal void LogWarning(string warning) {
