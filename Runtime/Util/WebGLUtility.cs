@@ -202,7 +202,8 @@ namespace Xasu.Util
             {
                 "ms"         => value / 1000.0f,
                 "s"          => value,
-                "m" or "min" => value * 60.0f,
+                "m"   => value * 60.0f,
+                "min" => value * 60.0f,
                 "h"          => value * 3600.0f,
                 "d"          => value * 86400.0f,
                 "w"          => value * 604800.0f,

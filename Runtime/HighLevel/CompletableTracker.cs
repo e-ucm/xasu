@@ -86,6 +86,14 @@ namespace Xasu.HighLevel
         private static Dictionary<string, DateTime> initializedTimes = new Dictionary<string, DateTime>();
 
         /// <summary>
+        /// Checks if the given completable id has been initialized.
+        /// </summary>
+        public static bool IsInitialized(string completableId)
+        {
+            return initializedTimes.ContainsKey(completableId);
+        }
+
+        /// <summary>
         /// Player initialized a completable.
         /// </summary>
         /// <param name="completableId">Completable identifier.</param>
