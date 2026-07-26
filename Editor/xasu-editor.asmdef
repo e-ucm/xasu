@@ -1,8 +1,8 @@
 {
     "name": "xasu-editor",
     "references": [
-        "GUID:08e346b04c3ec374b8a3849fcc6b467c",
-        "GUID:5f68587534902db4d9c9031fc37339e0"
+        "GUID:500f88a29034f3742ba0b7cc77c92b21",
+        "GUID:87445ace5702e5e45999f9c18d27f2cd"
     ],
     "includePlatforms": [
         "Editor"

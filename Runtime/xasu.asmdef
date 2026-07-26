@@ -2,8 +2,7 @@
     "name": "xasu",
     "rootNamespace": "",
     "references": [
-        "GUID:a5ca23f18daed2d45b37b1ee9fc9d9d7",
-        "GUID:75469ad4d38634e559750d17036d5f7c"
+        "GUID:cefa5ddb59ec7404aa2ea8a3f145fbb1"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
