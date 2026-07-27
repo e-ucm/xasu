@@ -17,7 +17,7 @@ public static class UnityMyHttpRequestExtension
                 request = UnityWebRequest.Get(myRequest.url);
                 break;
             case "POST":
-                request = new UnityWebRequest(myRequest.url, "POST");
+                request = UnityWebRequest.PostWwwForm(myRequest.url, "");
                 break;
             case "PUT":
                 request = UnityWebRequest.Put(myRequest.url, myRequest.content);
