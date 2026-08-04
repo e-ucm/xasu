@@ -37,10 +37,14 @@ namespace Xasu.HighLevel
 
         protected StatementTarget GetTargetActivity(string id, Enum type, string name = null, string description = null)
         {
-            if (!Uri.IsWellFormedUriString(id, UriKind.Absolute))
+            if (!Uri.TryCreate(id, UriKind.Absolute, out var uri) ||
+                string.IsNullOrEmpty(uri.Host)) // or check the scheme explicitly
             {
-                id = XasuTracker.Instance.DefaultIdPrefix + id;
+                id = XasuTracker.Instance.DefaultIdPrefix + Uri.EscapeDataString(id);
+                uri = new Uri(id);
             }
+            
+            id = uri.AbsoluteUri;
 
             return new Activity
             {
