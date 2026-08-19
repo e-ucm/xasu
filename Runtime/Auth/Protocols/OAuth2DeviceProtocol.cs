@@ -24,6 +24,8 @@ namespace Xasu.Auth.Protocols
         private const string clientIdField = "client_id";
         private const string scopeField = "scope";
         private const string homePageField = "homepage";
+        private const string pollIntervalField = "poll_interval";
+        private const string maxPollAttemptsField = "max_poll_attempts";
 
         private string deviceAuthorizationEndpoint;
         private string tokenEndpoint;
@@ -51,6 +53,30 @@ namespace Xasu.Auth.Protocols
             tokenEndpoint = config.GetRequiredValue(tokenEndpointField, fieldMissingMessage);
             clientId = config.GetRequiredValue(clientIdField, fieldMissingMessage);
 
+            if (!IsValidHttpUrl(deviceAuthorizationEndpoint))
+            {
+                State = AuthState.Errored;
+                ErrorMessage = "The device authorization endpoint is not a valid URL.";
+                XasuTracker.Instance.LogError("[OAuth2Device] " + ErrorMessage + " Received: " + deviceAuthorizationEndpoint);
+                throw new OAuth2AuthorizationError
+                {
+                    Error = "invalid_device_authorization_endpoint",
+                    ErrorDescription = ErrorMessage + " Received: " + deviceAuthorizationEndpoint
+                };
+            }
+
+            if (!IsValidHttpUrl(tokenEndpoint))
+            {
+                State = AuthState.Errored;
+                ErrorMessage = "The token endpoint is not a valid URL.";
+                XasuTracker.Instance.LogError("[OAuth2Device] " + ErrorMessage + " Received: " + tokenEndpoint);
+                throw new OAuth2AuthorizationError
+                {
+                    Error = "invalid_token_endpoint",
+                    ErrorDescription = ErrorMessage + " Received: " + tokenEndpoint
+                };
+            }
+
             scope = config.Value(scopeField);
 
             homePage = tokenEndpoint.Replace((new Uri(tokenEndpoint)).AbsolutePath, "");
@@ -69,6 +95,18 @@ namespace Xasu.Auth.Protocols
                 ? deviceAuth.VerificationUriComplete
                 : deviceAuth.VerificationUri;
 
+            if (!IsValidHttpUrl(verificationUrl))
+            {
+                State = AuthState.Errored;
+                ErrorMessage = "The device authorization server did not provide a valid verification URL.";
+                XasuTracker.Instance.LogError("[OAuth2Device] " + ErrorMessage + " Received: " + verificationUrl);
+                throw new OAuth2AuthorizationError
+                {
+                    Error = "invalid_verification_uri",
+                    ErrorDescription = ErrorMessage
+                };
+            }
+
             AuthUtility.OpenUrl(verificationUrl);
 
             XasuTracker.Instance.Log("[OAuth2Device] Opened verification URL: " + verificationUrl);
@@ -77,11 +115,25 @@ namespace Xasu.Auth.Protocols
             var interval = deviceAuth.Interval > 0 ? deviceAuth.Interval : 5;
             var maxAttempts = deviceAuth.ExpiresIn > 0 ? (deviceAuth.ExpiresIn / interval) + 1 : 60;
 
+            if (config.ContainsKey(pollIntervalField) && int.TryParse(config.Value(pollIntervalField), out int pollInterval) && pollInterval > 0)
+            {
+                interval = pollInterval;
+            }
+            if (config.ContainsKey(maxPollAttemptsField) && int.TryParse(config.Value(maxPollAttemptsField), out int pollMaxAttempts) && pollMaxAttempts > 0)
+            {
+                maxAttempts = pollMaxAttempts;
+            }
+
+            XasuTracker.Instance.Log(string.Format("[OAuth2Device] Polling token endpoint every {0}s for up to {1} attempts.", interval, maxAttempts));
+
             token = await PollForToken(tokenEndpoint, clientId, deviceAuth.DeviceCode, interval, maxAttempts);
 
             if (token != null)
             {
+                State = AuthState.Working;
                 XasuTracker.Instance.Log("[OAuth2Device] Token obtained: " + token.AccessToken);
+                XasuTracker.Instance.Log("[OAuth2Device] Username found: " + token.Username);
+                onAuthorizationInfoUpdate?.Invoke(token);
                 Agent = new Agent
                 {
                     account = new AgentAccount
@@ -141,7 +193,26 @@ namespace Xasu.Auth.Protocols
             try
             {
                 var response = await RequestHandler.SendRequest(httpRequest);
-                return JsonConvert.DeserializeObject<OAuth2DeviceAuthorization>(Encoding.UTF8.GetString(response.content));
+
+                if (response.status < 200 || response.status >= 300)
+                {
+                    throw BuildDeviceAuthorizationError(response, httpRequest.url);
+                }
+
+                var deviceAuth = JsonConvert.DeserializeObject<OAuth2DeviceAuthorization>(Encoding.UTF8.GetString(response.content ?? new byte[0]));
+
+                if (string.IsNullOrEmpty(deviceAuth.DeviceCode) ||
+                    string.IsNullOrEmpty(deviceAuth.UserCode) ||
+                    (string.IsNullOrEmpty(deviceAuth.VerificationUri) && string.IsNullOrEmpty(deviceAuth.VerificationUriComplete)))
+                {
+                    throw new OAuth2AuthorizationError
+                    {
+                        Error = "invalid_response",
+                        ErrorDescription = "The device authorization server response is missing required fields (device_code, user_code or verification_uri)."
+                    };
+                }
+
+                return deviceAuth;
             }
             catch (APIException ex)
             {
@@ -163,6 +234,41 @@ namespace Xasu.Auth.Protocols
             }
         }
 
+        private static Exception BuildDeviceAuthorizationError(MyHttpResponse response, string url)
+        {
+            var body = Encoding.UTF8.GetString(response.content ?? new byte[0]);
+
+            OAuth2AuthorizationError error = null;
+            try
+            {
+                error = JsonConvert.DeserializeObject<OAuth2AuthorizationError>(body);
+            }
+            catch { }
+
+            if (error != null && !string.IsNullOrEmpty(error.Error))
+            {
+                error.ErrorDescription = string.IsNullOrEmpty(error.ErrorDescription) ? body : error.ErrorDescription;
+                return error;
+            }
+
+            return new OAuth2AuthorizationError
+            {
+                Error = "http_" + response.status,
+                ErrorDescription = string.Format("Device authorization request to \"{0}\" failed with HTTP status {1}: {2}", url, response.status, body)
+            };
+        }
+
+        private static bool IsValidHttpUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return false;
+            }
+
+            return Uri.TryCreate(url, UriKind.Absolute, out Uri uri)
+                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+        }
+
         private async Task<OAuth2Token> PollForToken(string tokenUrl, string clientId, string deviceCode, int interval, int maxAttempts)
         {
             for (int attempt = 0; attempt < maxAttempts; attempt++)
@@ -181,18 +287,89 @@ namespace Xasu.Auth.Protocols
                     url = tokenUrl,
                     method = "POST",
                     form = form,
-                    policy = Policy
+                    policy = Policy,
+                    timeout = Math.Max(interval, 10)
                 };
+
+                XasuTracker.Instance.Log(string.Format("[OAuth2Device] Poll attempt {0}/{1}: POST {2} (client_id={3}, device_code={4})", attempt + 1, maxAttempts, tokenUrl, clientId, deviceCode));
 
                 try
                 {
                     var response = await RequestHandler.SendRequest(httpRequest);
-                    var tokenResponse = JsonConvert.DeserializeObject<OAuth2Token>(Encoding.UTF8.GetString(response.content));
+
+                    var responseBody = Encoding.UTF8.GetString(response.content ?? new byte[0]);
+                    XasuTracker.Instance.Log("[OAuth2Device] Poll response (" + response.status + "): " + responseBody);
+
+                    if (response.status < 200 || response.status >= 300)
+                    {
+                        OAuth2DeviceAuthorizationError error = null;
+                        try
+                        {
+                            error = JsonConvert.DeserializeObject<OAuth2DeviceAuthorizationError>(responseBody);
+                        }
+                        catch { }
+
+                        if (error != null)
+                        {
+                            switch (error.Error)
+                            {
+                                case "authorization_pending":
+                                    XasuTracker.Instance.Log("[OAuth2Device] Waiting for user authorization...");
+                                    continue;
+
+                                case "slow_down":
+                                    XasuTracker.Instance.Log("[OAuth2Device] Slow down: adding 5s to interval");
+                                    interval += 5;
+                                    continue;
+
+                                case "expired_token":
+                                    throw new OAuth2AuthorizationError
+                                    {
+                                        Error = "expired_token",
+                                        ErrorDescription = "The device code has expired. Please restart the authorization flow."
+                                    };
+
+                                case "access_denied":
+                                    throw new OAuth2AuthorizationError
+                                    {
+                                        Error = "access_denied",
+                                        ErrorDescription = "The user denied the authorization request."
+                                    };
+
+                                default:
+                                    throw error;
+                            }
+                        }
+
+                        throw new OAuth2AuthorizationError
+                        {
+                            Error = "http_" + response.status,
+                            ErrorDescription = string.Format("Token request to \"{0}\" failed with HTTP status {1}: {2}", tokenUrl, response.status, responseBody)
+                        };
+                    }
+
+                    var tokenResponse = JsonConvert.DeserializeObject<OAuth2Token>(responseBody);
+                    if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
+                    {
+                        throw new OAuth2AuthorizationError
+                        {
+                            Error = "invalid_response",
+                            ErrorDescription = "The token endpoint response is missing the access_token."
+                        };
+                    }
+
                     tokenResponse.ClientId = clientId;
+                    XasuTracker.Instance.Log("[OAuth2Device] Token retrieved after " + (attempt + 1) + " attempt(s).");
                     return tokenResponse;
+                }
+                catch (NetworkException ex)
+                {
+                    XasuTracker.Instance.Log("[OAuth2Device] Network error during token poll (will retry): " + ex.Message);
+                    continue;
                 }
                 catch (APIException ex)
                 {
+                    // Fallback for request handlers that throw instead of returning the error response
                     OAuth2DeviceAuthorizationError error = null;
                     try
                     {

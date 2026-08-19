@@ -27,6 +27,11 @@ public static class UnityMyHttpRequestExtension
                 break;
         }
 
+        if (myRequest.timeout > 0)
+        {
+            request.timeout = myRequest.timeout;
+        }
+
         if (myRequest.form != null)
         {
             var formUrlEncoded = myRequest.form

@@ -28,8 +28,16 @@ namespace Xasu.Auth.Protocols.OAuth2
             set
             {
                 access_token = value;
-                var payload = Encoding.UTF8.GetString(Base64Url.Decode(access_token.Split('.')[1]));
-                decodedJWT = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+                try
+                {
+                    var payload = Encoding.UTF8.GetString(Base64Url.Decode(access_token.Split('.')[1]));
+                    decodedJWT = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+                    XasuTracker.Instance?.Log("[OAuth2Token] JWT decoded. preferred_username: " + Username);
+                }
+                catch (Exception ex)
+                {
+                    XasuTracker.Instance?.LogError("[OAuth2Token] Failed to decode access_token JWT: " + ex.Message, ex);
+                }
             }
         }
 
@@ -49,6 +57,16 @@ namespace Xasu.Auth.Protocols.OAuth2
         public bool Expired { get { return Created + new TimeSpan(0, 0, Expires) < DateTime.Now; } }
 
         [JsonIgnore]
-        public string Username { get { return (string)decodedJWT["preferred_username"]; } }
+        public string Username
+        {
+            get
+            {
+                if (decodedJWT != null && decodedJWT.TryGetValue("preferred_username", out object value) && value != null)
+                {
+                    return value.ToString();
+                }
+                return null;
+            }
+        }
     }
 }

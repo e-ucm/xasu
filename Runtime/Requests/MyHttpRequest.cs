@@ -19,5 +19,6 @@ namespace Xasu.Requests
         public string text { get; set; }
         public IAuthProtocol authorization { get; set; }
         public IAsyncPolicy policy { get; set; }
+        public int timeout { get; set; }
     }
 }
